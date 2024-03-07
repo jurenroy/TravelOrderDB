@@ -14,6 +14,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'api/*', // Example: Exclude all routes under 'api' prefix
         '/form',
+        'update_form/*',
         //
     ];
 }

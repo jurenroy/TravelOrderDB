@@ -56,6 +56,27 @@ class FormController extends Controller
         $form->save();
 
         // Redirect the user back to the form or any other page
-        return redirect('/form')->with('success', 'Form submitted successfully!');
+        return redirect('/add_form')->with('success', 'Form submitted successfully!');
     }
+
+    public function update_via_post(Request $request, $id)
+    {
+        $form = Form::findOrFail($id);
+    
+        $originalData = $form->getOriginal();
+        $updatedData = $request->all();
+    
+        // Compare original data with updated data and only update the fields that have changed
+        foreach ($updatedData as $key => $value) {
+            if ($originalData[$key] != $value) {
+                $form->$key = $value;
+            }
+        }
+    
+        // Save the updated form
+        $form->save();
+    
+        return response()->json(['message' => 'Resource updated successfully']);
+    }
+
 }

@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Form extends Model
 {
+
     use HasFactory;
+
+    protected $primaryKey = 'travel_order_id';
+    
     protected $fillable = [
         'name_id',
         'position_id',

@@ -31,7 +31,7 @@ Route::get('/status', function () {
     return view('status');
 });
 
-Route::get('/employees', function () {
+Route::get('/get_employees_json', function () {
     $employee = Employee::all();
     return response()->json($employee);
 });
@@ -51,6 +51,15 @@ Route::get('/get_divisions_json', function () {
     return response()->json($divisions);
 });
 
-Route::get('/form', [FormController::class, 'showForm']);
-Route::post('/form', [FormController::class, 'submitForm'])->name('submit.form');
+Route::get('/get_forms_json', function () {
+    $forms = Form::all();
+    return response()->json($forms);
+});
+
+Route::get('/add_form', [FormController::class, 'showForm']);
+Route::post('/add_form', [FormController::class, 'submitForm'])->name('submit.form');
+
+Route::post('update_form/{id}', [FormController::class, 'update_via_post']);
+
+
 
