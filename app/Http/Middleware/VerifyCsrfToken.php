@@ -13,8 +13,14 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'api/*', // Example: Exclude all routes under 'api' prefix
-        '/form',
+        '/add_form',
         'update_form/*',
+        'get_names_json/',
+        'get_namez_json/',
+        'get_positions_json/',
+        'get_divisions_json/',
+        'get_employees_json/',
+        'get_forms_json/',
         //
     ];
 }

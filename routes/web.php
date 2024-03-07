@@ -36,7 +36,7 @@ Route::get('/get_employees_json', function () {
     return response()->json($employee);
 });
 
-Route::get('/get_names_json', function () {
+Route::get('/get_namez_json', function () {
     $names = Name::all();
     return response()->json($names);
 });
@@ -55,6 +55,12 @@ Route::get('/get_forms_json', function () {
     $forms = Form::all();
     return response()->json($forms);
 });
+
+Route::middleware('cors')->get('/get_names_json', function () {
+    $names = Name::all();
+    return response()->json($names);
+});
+
 
 Route::get('/add_form', [FormController::class, 'showForm']);
 Route::post('/add_form', [FormController::class, 'submitForm'])->name('submit.form');
