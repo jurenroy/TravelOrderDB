@@ -6,11 +6,14 @@ use App\Models\Employee;
 
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\AccountController;
 
 use App\Models\Name;
 use App\Models\Position;
 use App\Models\Division;
 use App\Models\Form;
+use App\Models\Account;
+use App\Models\Type;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +59,16 @@ Route::get('/get_forms_json', function () {
     return response()->json($forms);
 });
 
+Route::get('/get_accounts_json', function () {
+    $accounts = Account::all();
+    return response()->json($accounts);
+});
+
+Route::get('/get_type_json', function () {
+    $types = Type::all();
+    return response()->json($types);
+});
+
 Route::middleware('cors')->get('/get_names_json', function () {
     $names = Name::all();
     return response()->json($names);
@@ -67,5 +80,9 @@ Route::post('/add_form', [FormController::class, 'submitForm'])->name('submit.fo
 
 Route::post('update_form/{id}', [FormController::class, 'update_via_post']);
 
+Route::get('/add_account', [AccountController::class, 'showForm']);
+Route::post('/add_account', [AccountController::class, 'submitForm'])->name('submit.form');
+
+Route::post('update_account/{id}', [AccountController::class, 'update_via_post']);
 
 
