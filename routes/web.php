@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\OTPController;
 
 use App\Models\Name;
 use App\Models\Position;
@@ -14,6 +15,7 @@ use App\Models\Division;
 use App\Models\Form;
 use App\Models\Account;
 use App\Models\Type;
+use App\Models\OTP;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +71,11 @@ Route::get('/get_type_json', function () {
     return response()->json($types);
 });
 
+Route::get('/get_otp_json', function () {
+    $otps = OTP::all();
+    return response()->json($otps);
+});
+
 Route::middleware('cors')->get('/get_names_json', function () {
     $names = Name::all();
     return response()->json($names);
@@ -85,4 +92,4 @@ Route::post('/add_account', [AccountController::class, 'submitForm'])->name('sub
 
 Route::post('update_account/{id}', [AccountController::class, 'update_via_post']);
 
-
+Route::post('/send-otp/{account_id}', [OTPController::class, 'sendOTP']);

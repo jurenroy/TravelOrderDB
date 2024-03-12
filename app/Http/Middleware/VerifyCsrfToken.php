@@ -24,7 +24,9 @@ class VerifyCsrfToken extends Middleware
         'add_account/',
         'update_account/*',
         'get_accounts_json/',
-        'get_type_json/'
+        'get_type_json/',
+        '/send-otp/*',
+        '/get_otp_json'
         //
     ];
 }
