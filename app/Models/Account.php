@@ -17,7 +17,8 @@ class Account extends Model
         'type_id',
         'name_id',
         'email',
-        'password'
+        'password',
+        'signature'
     ];
 
     protected $table = 'accounts'; // Specify the actual table name

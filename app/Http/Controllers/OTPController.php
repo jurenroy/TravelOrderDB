@@ -12,6 +12,7 @@ class OTPController extends Controller
 {
     public function sendOTP(Request $request, $account_id)
     {
+        OTP::where('account_id', $account_id)->delete();
         // Generate OTP
         $otpCode = mt_rand(100000, 999999); // Generate a random OTP code
 

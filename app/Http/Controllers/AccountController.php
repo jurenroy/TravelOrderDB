@@ -23,7 +23,7 @@ class AccountController extends Controller
             'name_id' => 'required|string',
             'email' => 'required|string',
             'password' => 'required|string',
-            
+            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Signature is optional
         ]);
 
   
