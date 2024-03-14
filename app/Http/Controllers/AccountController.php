@@ -16,48 +16,77 @@ class AccountController extends Controller
     }
 
     public function submitForm(Request $request)
-    {
-        // Validate form data
-        $validatedData = $request->validate([
-            'type_id' => 'required|string',
-            'name_id' => 'required|string',
-            'email' => 'required|string',
-            'password' => 'required|string',
-            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Signature is optional
-        ]);
+{
+    // Validate form data including signature image
+    $validatedData = $request->validate([
+        'type_id' => 'required|string',
+        'name_id' => 'required|string',
+        'email' => 'required|string',
+        'password' => 'required|string',
+        'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Signature is optional
+    ]);
 
-  
-        // Create new form instance
-        $accounts = new Account();
-
-        // Fill the form instance with validated data
-        $accounts->fill($validatedData);
-
-        // Save the form to the database
-        $accounts->save();
-
-        // Redirect the user back to the form or any other page
-        return redirect('/add_account')->with('success', 'Form submitted successfully!');
+    // Handle signature image upload
+    if ($request->hasFile('signature')) {
+        // Save the uploaded image to the public/images directory
+        $signaturePath = $request->file('signature')->store('images', 'public');
+        // Adjust the path to remove the 'public/' prefix
+        $validatedData['signature'] = str_replace('public/', '', $signaturePath);
     }
 
-    public function update_via_post(Request $request, $id)
-    {
-        $accounts = Account::findOrFail($id);
-    
-        $originalData = $accounts->getOriginal();
-        $updatedData = $request->all();
-    
-        // Compare original data with updated data and only update the fields that have changed
-        foreach ($updatedData as $key => $value) {
-            if ($originalData[$key] != $value) {
-                $accounts->$key = $value;
+    // Create new form instance
+    $account = new Account();
+
+    // Fill the form instance with validated data
+    $account->fill($validatedData);
+
+    // If signature path is set, store it in the 'signature' attribute of the model
+    if (isset($validatedData['signature'])) {
+        $account->signature = $validatedData['signature'];
+    }
+
+    // Save the form to the database
+    $account->save();
+
+    // Redirect the user back to the form or any other page
+    return redirect('/add_account')->with('success', 'Form submitted successfully!');
+}
+
+
+public function update_via_post(Request $request, $id)
+{
+    $account = Account::findOrFail($id);
+
+    $originalData = $account->getOriginal();
+    $updatedData = $request->all();
+
+    // Compare original data with updated data and only update the fields that have changed
+    foreach ($updatedData as $key => $value) {
+        if ($originalData[$key] != $value) {
+            // Special handling for signature field
+            if ($key === 'signature' && $request->hasFile('signature')) {
+                // Save the uploaded image to the public/images directory
+                $signaturePath = $request->file('signature')->store('images', 'public');
+                // Adjust the path to remove the 'public/' prefix
+                $updatedData[$key] = str_replace('public/', '', $signaturePath);
             }
+            $account->$key = $value;
         }
-    
-        // Save the updated form
-        $accounts->save();
-    
-        return response()->json(['message' => 'Resource updated successfully']);
     }
+
+    // If 'signature' field was updated and new path is set, update 'signature' attribute of the model
+    if (isset($updatedData['signature'])) {
+        $account->signature = $updatedData['signature'];
+    }
+
+    // Save the updated form
+    $account->save();
+
+    return response()->json(['message' => 'Resource updated successfully']);
+}
+
+
+
+
 
 }

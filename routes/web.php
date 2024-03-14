@@ -81,7 +81,6 @@ Route::middleware('cors')->get('/get_names_json', function () {
     return response()->json($names);
 });
 
-
 Route::get('/add_form', [FormController::class, 'showForm']);
 Route::post('/add_form', [FormController::class, 'submitForm'])->name('submit.form');
 
@@ -93,3 +92,5 @@ Route::post('/add_account', [AccountController::class, 'submitForm'])->name('sub
 Route::post('update_account/{id}', [AccountController::class, 'update_via_post']);
 
 Route::post('/send-otp/{account_id}', [OTPController::class, 'sendOTP']);
+
+
