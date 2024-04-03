@@ -27,11 +27,15 @@ class Form extends Model
         'ala',
         'appropriations',
         'remarks',
+        'note',
+
         // 'date' is not included as it's set to auto-populate
     ];
 
     protected $table = 'form'; // Specify the actual table name
 
     public $timestamps = false; // Disable timestamps
+
+    
 
 }

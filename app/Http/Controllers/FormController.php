@@ -33,6 +33,7 @@ class FormController extends Controller
             'ala' => 'nullable|string',
             'appropriations' => 'nullable|string',
             'remarks' => 'nullable|string',
+            'note' => 'nullable|string',
         ]);
 
         // Handle file uploads

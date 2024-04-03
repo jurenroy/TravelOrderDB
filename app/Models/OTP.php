@@ -15,4 +15,14 @@ class OTP extends Model
         'code',
         'account_id',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($otp) {
+            $otp->expires_at = now()->addMinutes(2);
+        });
+    }
+    
 }
