@@ -2,13 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Models\Employee;
-
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OTPController;
 
+use App\Models\Employee;
 use App\Models\Name;
 use App\Models\Position;
 use App\Models\Division;
@@ -92,5 +91,7 @@ Route::post('/add_account', [AccountController::class, 'submitForm'])->name('sub
 Route::post('update_account/{id}', [AccountController::class, 'update_via_post']);
 
 Route::post('/send-otp/{account_id}', [OTPController::class, 'sendOTP']);
+
+Route::post('update_employee/{name_id}', [EmployeeController::class, 'update_via_post']);
 
 
