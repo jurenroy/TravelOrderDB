@@ -28,6 +28,8 @@ class Form extends Model
         'appropriations',
         'remarks',
         'note',
+        'sname',
+        'sdiv'
 
         // 'date' is not included as it's set to auto-populate
     ];
