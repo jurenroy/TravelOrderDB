@@ -36,6 +36,7 @@ class FormController extends Controller
             'note' => 'nullable|string',
             'sname' => 'nullable|string',
             'sdiv' => 'nullable|string',
+            'to_num' => 'nullable|string',
         ]);
 
         // Handle file uploads
@@ -75,6 +76,16 @@ class FormController extends Controller
                 $form->$key = $value;
             }
         }
+
+        // Check if the request has signature2 and it's not null
+        if ($request->filled('signature2')) {
+            // Count all forms with signature2 not null
+            $countWithSignature2 = Form::whereNotNull('signature2')->count();
+
+            // Increment to_num by 301 based on the count
+            $form->to_num = $countWithSignature2 + 301;
+        }
+
     
         // Save the updated form
         $form->save();

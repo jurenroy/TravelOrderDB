@@ -29,7 +29,8 @@ class Form extends Model
         'remarks',
         'note',
         'sname',
-        'sdiv'
+        'sdiv',
+        'to_num'
 
         // 'date' is not included as it's set to auto-populate
     ];
