@@ -9,4 +9,12 @@ class Position extends Model
 {
     use HasFactory;
     protected $table = 'position';
+
+    protected $primaryKey = 'position_id';
+    
+    protected $fillable = [
+        'position_name',
+    ];
+
+    public $timestamps = false; // Disable timestamps
 }

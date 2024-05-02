@@ -93,5 +93,7 @@ Route::post('update_account/{id}', [AccountController::class, 'update_via_post']
 Route::post('/send-otp/{account_id}', [OTPController::class, 'sendOTP']);
 
 Route::post('update_employee/{name_id}', [EmployeeController::class, 'update_via_post']);
+Route::post('/add_employees', [EmployeeController::class, 'store']);
+Route::post('edit_employee', [EmployeeController::class, 'edit_employee']);
 
 

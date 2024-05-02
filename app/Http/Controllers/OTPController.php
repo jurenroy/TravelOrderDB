@@ -19,7 +19,7 @@ class OTPController extends Controller
         // Send OTP via email
         // Retrieve the user's email based on the provided account_id
         $user = Account::findOrFail($account_id); // Assuming Account model is used
-        // Mail::to($user->email)->send(new OTPMail($otpCode));
+        Mail::to($user->email)->send(new OTPMail($otpCode));
 
         // Store OTP in database
         OTP::create([

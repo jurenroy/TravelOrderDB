@@ -18,6 +18,7 @@ class Employee extends Model
         'division_id',
         'chief',
         'rd',
+        'isActive',
     ];
 
     protected $table = 'employee';

@@ -28,6 +28,10 @@ class VerifyCsrfToken extends Middleware
         '/send-otp/*',
         '/get_otp_json',
         '/update_employee/*',
+        '/add_employees',
+        'edit_employee/',
+        '/storage/images/*',
+        '*'
         //
     ];
 }
