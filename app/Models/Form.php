@@ -30,7 +30,8 @@ class Form extends Model
         'note',
         'sname',
         'sdiv',
-        'to_num'
+        'to_num',
+        'initial'
 
         // 'date' is not included as it's set to auto-populate
     ];

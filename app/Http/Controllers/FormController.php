@@ -37,6 +37,7 @@ class FormController extends Controller
             'sname' => 'nullable|string',
             'sdiv' => 'nullable|string',
             'to_num' => 'nullable|string',
+            'initial' => 'nullable|string',
         ]);
 
         // Handle file uploads
@@ -49,6 +50,17 @@ class FormController extends Controller
             $signature2Path = $request->file('signature2')->store('signatures');
             $validatedData['signature2'] = $signature2Path;
         }
+
+        // Valid name_id values
+        $validNameIds = [
+            39, 2, 3, 8, 42, 34, 29, 36, 48, 5, 47, 15, 45, 21, 52, 51, 13, 10, 37, 62, 53, 75, 4, 56, 58, 55, 60, 59, 20
+        ];
+    
+        // Set initial to 'initialized' if name_id is in the valid list
+        if (in_array((int)$validatedData['name_id'], $validNameIds)) {
+            $validatedData['initial'] = 'initialized';
+        }
+                              
 
         // Create new form instance
         $form = new Form();
