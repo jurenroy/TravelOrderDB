@@ -38,6 +38,8 @@ class FormController extends Controller
             'sdiv' => 'nullable|string',
             'to_num' => 'nullable|string',
             'initial' => 'nullable|string',
+            'intervals' => 'nullable|string',
+            'aor' => 'nullable|string',
         ]);
 
         // Handle file uploads
@@ -60,7 +62,15 @@ class FormController extends Controller
         if (in_array((int)$validatedData['name_id'], $validNameIds)) {
             $validatedData['initial'] = 'initialized';
         }
-                              
+
+        // Check if the request has signature2 and it's not null, and if name_id is 20
+        if ($request->filled('name_id') && $validatedData['name_id'] == 20) {
+            // Count all forms with signature2 not null
+            $countWithSignature2 = Form::whereNotNull('signature2')->count();
+        
+            // Increment to_num by 301 based on the count
+            $validatedData['to_num'] = $countWithSignature2 + 301;
+        }   
 
         // Create new form instance
         $form = new Form();

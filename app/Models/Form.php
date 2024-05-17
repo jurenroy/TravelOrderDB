@@ -31,7 +31,9 @@ class Form extends Model
         'sname',
         'sdiv',
         'to_num',
-        'initial'
+        'initial',
+        'intervals',
+        'aor'
 
         // 'date' is not included as it's set to auto-populate
     ];
