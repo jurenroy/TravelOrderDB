@@ -65,11 +65,16 @@ class FormController extends Controller
 
         // Check if the request has signature2 and it's not null, and if name_id is 20
         if ($request->filled('name_id') && $validatedData['name_id'] == 20) {
-            // Count all forms with signature2 not null
-            $countWithSignature2 = Form::whereNotNull('signature2')->count();
+            // Get the maximum value of to_num from the database
+            $maxToNum = Form::max('to_num');
+
+            // Increment the maximum value by 1 to get the next available number
+            $newToNum = $maxToNum + 1;
         
             // Increment to_num by 301 based on the count
-            $validatedData['to_num'] = $countWithSignature2 + 301;
+            $validatedData['to_num'] = $newToNum;
+
+            
         }   
 
         // Create new form instance
@@ -101,11 +106,26 @@ class FormController extends Controller
 
         // Check if the request has signature2 and it's not null
         if ($request->filled('signature2')) {
-            // Count all forms with signature2 not null
-            $countWithSignature2 = Form::whereNotNull('signature2')->count();
+            // Get the maximum value of to_num from the database
+            $maxToNum = Form::max('to_num');
+
+            // Increment the maximum value by 1 to get the next available number
+            $newToNum = $maxToNum + 1;
 
             // Increment to_num by 301 based on the count
-            $form->to_num = $countWithSignature2 + 301;
+            $form->to_num = $newToNum;
+        }
+
+        // Check if the request has signature2 and it's not null
+        if ($request->filled('signature1') && $request->filled('name_id') && in_array($request->name_id, [15, 21, 45, 48])) {
+            // Get the maximum value of to_num from the database
+            $maxToNum = Form::max('to_num');
+
+            // Increment the maximum value by 1 to get the next available number
+            $newToNum = $maxToNum + 1;
+
+            // Increment to_num by 301 based on the count
+            $form->to_num = $newToNum;
         }
 
     
