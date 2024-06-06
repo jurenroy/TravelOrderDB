@@ -42,6 +42,4 @@ class Form extends Model
 
     public $timestamps = false; // Disable timestamps
 
-    
-
 }

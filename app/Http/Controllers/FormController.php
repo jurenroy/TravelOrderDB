@@ -73,8 +73,17 @@ class FormController extends Controller
         
             // Increment to_num by 301 based on the count
             $validatedData['to_num'] = $newToNum;
+        }   
+        // Check if the request has signature2 and it's not null, and if name_id is 20
+        if ($request->filled('name_id') && $validatedData['name_id'] == 15 && $validatedData['aor'] == 1 && $validatedData['intervals'] == 1) {
+            // Get the maximum value of to_num from the database
+            $maxToNum = Form::max('to_num');
 
-            
+            // Increment the maximum value by 1 to get the next available number
+            $newToNum = $maxToNum + 1;
+        
+            // Increment to_num by 301 based on the count
+            $validatedData['to_num'] = $newToNum;
         }   
 
         // Create new form instance
