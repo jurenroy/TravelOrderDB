@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OTPController;
+use App\Http\Controllers\LeaveFormController;
 
 use App\Models\Employee;
 use App\Models\Name;
@@ -15,6 +16,7 @@ use App\Models\Form;
 use App\Models\Account;
 use App\Models\Type;
 use App\Models\OTP;
+use App\Models\LeaveForm;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +77,11 @@ Route::get('/get_otp_json', function () {
     return response()->json($otps);
 });
 
+Route::get('/get_leave_json', function () {
+    $leave = LeaveForm::all();
+    return response()->json($leave);
+});
+
 Route::middleware('cors')->get('/get_names_json', function () {
     $names = Name::all();
     return response()->json($names);
@@ -95,5 +102,9 @@ Route::post('/send-otp/{account_id}', [OTPController::class, 'sendOTP']);
 Route::post('update_employee/{name_id}', [EmployeeController::class, 'update_via_post']);
 Route::post('/add_employees', [EmployeeController::class, 'store']);
 Route::post('edit_employee', [EmployeeController::class, 'edit_employee']);
+
+Route::post('/addleave_form', [LeaveFormController::class, 'store']);
+
+Route::post('updateleave_form/{id}', [LeaveFormController::class, 'update']);
 
 

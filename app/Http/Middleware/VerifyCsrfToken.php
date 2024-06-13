@@ -31,6 +31,8 @@ class VerifyCsrfToken extends Middleware
         '/add_employees',
         'edit_employee/',
         '/storage/images/*',
+        '/addleave_form',
+        'updateleave_form/*',
         '*'
         //
     ];
