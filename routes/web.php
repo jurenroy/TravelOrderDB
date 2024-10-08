@@ -110,6 +110,12 @@ Route::post('/addleave_form', [LeaveFormController::class, 'store']);
 
 Route::post('updateleave_form/{id}', [LeaveFormController::class, 'update']);
 
+// Service Routes
+Route::post('services', [ServiceController::class, 'store']); // Create
+Route::get('services', [ServiceController::class, 'index']); // Read all
+Route::get('services/{id}', [ServiceController::class, 'show']); // Read one
+Route::post('services/update/{id}', [ServiceController::class, 'update']); // Update
+Route::delete('services/{id}', [ServiceController::class, 'destroy']); // Delete
 // Feedback Routes
 Route::post('feedbacks', [FeedbackController::class, 'store']); // Create
 Route::get('feedbacks', [FeedbackController::class, 'index']); // Read all
