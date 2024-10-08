@@ -55,11 +55,21 @@ class FormController extends Controller
 
         // Valid name_id values
         $validNameIds = [
-            39, 2, 3, 8, 42, 34, 29, 36, 48, 5, 47, 15, 45, 21, 52, 51, 13, 10, 37, 62, 53, 75, 4, 56, 58, 55, 60, 59, 20
+            13,10,37,62,53,75,4,56,58,55,60,59,20,77
+        ];
+        $validSCNameIds = [
+            39,2,3,8,42,34,29,36,5,47,52,51
+        ];
+        $validDCNameIds = [
+            48,15,45,21
         ];
     
         // Set initial to 'initialized' if name_id is in the valid list
         if (in_array((int)$validatedData['name_id'], $validNameIds)) {
+            $validatedData['initial'] = 'initialized';
+        }else if(in_array((int)$validatedData['name_id'], $validSCNameIds && $validatedData['intervals'] !== 1)){
+            $validatedData['initial'] = 'initialized';
+        }else if(in_array((int)$validatedData['name_id'], $validDCNameIds && $validatedData['aor'] !== 1 && $validatedData['intervals'] !== 1)){
             $validatedData['initial'] = 'initialized';
         }
 
@@ -74,17 +84,17 @@ class FormController extends Controller
             // Increment to_num by 301 based on the count
             $validatedData['to_num'] = $newToNum;
         }   
-        // Check if the request has signature2 and it's not null, and if name_id is 20
-        if ($request->filled('name_id') && $validatedData['name_id'] == 15 && $validatedData['aor'] == 1 && $validatedData['intervals'] == 1) {
-            // Get the maximum value of to_num from the database
-            $maxToNum = Form::max('to_num');
+        // // Check if the request has signature2 and it's not null, and if name_id is 20
+        // if ($request->filled('name_id') && $validatedData['name_id'] == 15 && $validatedData['aor'] == 1 && $validatedData['intervals'] == 1) {
+        //     // Get the maximum value of to_num from the database
+        //     $maxToNum = Form::max('to_num');
 
-            // Increment the maximum value by 1 to get the next available number
-            $newToNum = $maxToNum + 1;
+        //     // Increment the maximum value by 1 to get the next available number
+        //     $newToNum = $maxToNum + 1;
         
-            // Increment to_num by 301 based on the count
-            $validatedData['to_num'] = $newToNum;
-        }   
+        //     // Increment to_num by 301 based on the count
+        //     $validatedData['to_num'] = $newToNum;
+        // }   
 
         // Create new form instance
         $form = new Form();
