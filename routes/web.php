@@ -18,6 +18,9 @@ use App\Models\Type;
 use App\Models\OTP;
 use App\Models\LeaveForm;
 
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\FeedbackController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -107,6 +110,12 @@ Route::post('/addleave_form', [LeaveFormController::class, 'store']);
 
 Route::post('updateleave_form/{id}', [LeaveFormController::class, 'update']);
 
+// Feedback Routes
+Route::post('feedbacks', [FeedbackController::class, 'store']); // Create
+Route::get('feedbacks', [FeedbackController::class, 'index']); // Read all
+Route::get('feedbacks/{id}', [FeedbackController::class, 'show']); // Read one
+Route::post('feedbacks/update/{id}', [FeedbackController::class, 'update']); // Update
+Route::delete('feedbacks/{id}', [FeedbackController::class, 'destroy']); // Delete
 
 // Route to serve images
 Route::get('/storage/{filename}', function ($filename) {
