@@ -30,7 +30,7 @@ class ServiceController extends Controller
 
         // Create the service with blank serviceRequestNo
         $service = Service::create(array_merge($request->all(), [
-            'serviceRequestNo' => null // Set serviceRequestNo to null on creation
+            'serviceRequestNo' => 'TBA' // Set serviceRequestNo to null on creation
         ]));
         
         return response()->json($service, 201);
@@ -79,7 +79,14 @@ class ServiceController extends Controller
                                   ->first();
 
             // Determine the next request number
-            $nextId = $lastService ? intval(substr($lastService->serviceRequestNo, -1)) + 1 : 1; // ID starts at 1
+            if ($lastService) {
+                // Extract the last numeric part of the serviceRequestNo
+                $lastRequestNo = $lastService->serviceRequestNo;
+                $lastId = intval(substr($lastRequestNo, strrpos($lastRequestNo, '-') + 1));
+                $nextId = $lastId + 1;
+            } else {
+                $nextId = 1; // ID starts at 1 if no previous "done" requests
+            }
             
             // Format the new service request number without leading zeros
             $serviceRequestNo = "$currentYear-$currentMonth-$nextId";
