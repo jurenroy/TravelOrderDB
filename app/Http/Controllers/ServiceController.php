@@ -28,11 +28,25 @@ class ServiceController extends Controller
             'feedback_filled' => 'boolean',
         ]);
 
-        // Generate the next serviceRequestNo
-        $lastService = Service::orderBy('serviceRequestNo', 'desc')->first();
-        $nextRequestNo = $lastService ? $lastService->serviceRequestNo + 1 : 1;
-
-        $service = Service::create(array_merge($request->all(), ['serviceRequestNo' => $nextRequestNo]));
+        // Get the current year and month
+        $currentYear = date('Y');
+        $currentMonth = date('m');
+        
+        // Find the last service request number in the current month and year
+        $lastService = Service::whereYear('created_at', $currentYear)
+                              ->whereMonth('created_at', $currentMonth)
+                              ->orderBy('id', 'desc')
+                              ->first();
+        
+        // Determine the next request number
+        $nextId = $lastService ? intval(substr($lastService->serviceRequestNo, -1)) + 1 : 1; // ID starts at 1
+        
+        // Format the new service request number without leading zeros
+        $serviceRequestNo = "$currentYear-$currentMonth-$nextId";
+        
+        // Create the service with the new request number
+        $service = Service::create(array_merge($request->all(), ['serviceRequestNo' => $serviceRequestNo]));
+        
         return response()->json($service, 201);
     }
 
