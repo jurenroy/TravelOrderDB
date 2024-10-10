@@ -72,23 +72,16 @@ class ServiceController extends Controller
             $currentYear = date('Y');
             $currentMonth = date('m');
 
-            // Find the last service request number in the current month and year
-            $lastService = Service::whereYear('created_at', $currentYear)
-                                  ->whereMonth('created_at', $currentMonth)
-                                  ->orderBy('id', 'desc')
-                                  ->first();
+            // Count how many services exist for the current month and year
+            $count = Service::whereYear('created_at', $currentYear)
+            ->whereMonth('created_at', $currentMonth)
+            ->where('serviceRequestNo', '!=', 'TBA') // Only count those not 'TBA'
+            ->count();
 
             // Determine the next request number
-            if ($lastService) {
-                // Extract the last numeric part of the serviceRequestNo
-                $lastRequestNo = $lastService->serviceRequestNo;
-                $lastId = intval(substr($lastRequestNo, strrpos($lastRequestNo, '-') + 1));
-                $nextId = $lastId + 1;
-            } else {
-                $nextId = 1; // ID starts at 1 if no previous "done" requests
-            }
-            
-            // Format the new service request number without leading zeros
+            $nextId = $count > 0 ? $count + 1 : 1; // Increment if count exists, else start at 1
+
+            // Format the new service request number
             $serviceRequestNo = "$currentYear-$currentMonth-$nextId";
 
             $service->serviceRequestNo = $serviceRequestNo; // Set the serviceRequestNo
