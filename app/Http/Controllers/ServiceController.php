@@ -21,31 +21,17 @@ class ServiceController extends Controller
             'division_id' => 'required|integer',
             'typeOfService' => 'required|string',
             'note' => 'nullable|string',
-            'remarks' => 'nullable|string',
+            'remarks' => 'nullable|string', // Allow remarks but set to blank
             'requestedBy' => 'required|integer',
             'approvedBy' => 'nullable|integer',
             'servicedBy' => 'nullable|integer',
             'feedback_filled' => 'boolean',
         ]);
 
-        // Get the current year and month
-        $currentYear = date('Y');
-        $currentMonth = date('m');
-        
-        // Find the last service request number in the current month and year
-        $lastService = Service::whereYear('created_at', $currentYear)
-                              ->whereMonth('created_at', $currentMonth)
-                              ->orderBy('id', 'desc')
-                              ->first();
-        
-        // Determine the next request number
-        $nextId = $lastService ? intval(substr($lastService->serviceRequestNo, -1)) + 1 : 1; // ID starts at 1
-        
-        // Format the new service request number without leading zeros
-        $serviceRequestNo = "$currentYear-$currentMonth-$nextId";
-        
-        // Create the service with the new request number
-        $service = Service::create(array_merge($request->all(), ['serviceRequestNo' => $serviceRequestNo]));
+        // Create the service with blank serviceRequestNo
+        $service = Service::create(array_merge($request->all(), [
+            'serviceRequestNo' => null // Set serviceRequestNo to null on creation
+        ]));
         
         return response()->json($service, 201);
     }
@@ -73,14 +59,37 @@ class ServiceController extends Controller
             'division_id' => 'sometimes|required|integer',
             'typeOfService' => 'sometimes|required|string',
             'note' => 'sometimes|nullable|string',
-            'remarks' => 'sometimes|nullable|string',
+            'remarks' => 'sometimes|nullable|string', // Validate remarks on update
             'requestedBy' => 'sometimes|required|integer',
             'approvedBy' => 'sometimes|nullable|integer',
             'servicedBy' => 'sometimes|nullable|integer',
             'feedback_filled' => 'sometimes|boolean',
         ]);
 
+        // Only set serviceRequestNo if remarks is 'Done'
+        if ($request->remarks === 'Done') {
+            // Get the current year and month
+            $currentYear = date('Y');
+            $currentMonth = date('m');
+
+            // Find the last service request number in the current month and year
+            $lastService = Service::whereYear('created_at', $currentYear)
+                                  ->whereMonth('created_at', $currentMonth)
+                                  ->orderBy('id', 'desc')
+                                  ->first();
+
+            // Determine the next request number
+            $nextId = $lastService ? intval(substr($lastService->serviceRequestNo, -1)) + 1 : 1; // ID starts at 1
+            
+            // Format the new service request number without leading zeros
+            $serviceRequestNo = "$currentYear-$currentMonth-$nextId";
+
+            $service->serviceRequestNo = $serviceRequestNo; // Set the serviceRequestNo
+        }
+
+        // Update the service with the new values
         $service->update($request->all());
+
         return response()->json($service);
     }
 
