@@ -58,7 +58,7 @@ class FormController extends Controller
             13,10,37,62,53,75,4,56,58,55,60,59,20,77
         ];
         $validSCNameIds = [
-            39,2,3,8,42,34,29,36,5,47,52,51
+            39,2,3,8,42,34,29,36,5,47,52,51,79,66,11,17,72,73
         ];
         $validDCNameIds = [
             48,15,45,21
@@ -67,16 +67,19 @@ class FormController extends Controller
         // Set initial to 'initialized' if name_id is in the valid list
         if (in_array((int)$validatedData['name_id'], $validNameIds)) {
             $validatedData['initial'] = 'initialized';
-        }else if(in_array((int)$validatedData['name_id'], $validSCNameIds && $validatedData['intervals'] !== 1)){
+        }else if(in_array((int)$validatedData['name_id'], $validSCNameIds) && $validatedData['intervals'] !== 1){
             $validatedData['initial'] = 'initialized';
-        }else if(in_array((int)$validatedData['name_id'], $validDCNameIds && $validatedData['aor'] !== 1 && $validatedData['intervals'] !== 1)){
+        }else if(in_array((int)$validatedData['name_id'], $validDCNameIds) && $validatedData['aor'] !== 1 && $validatedData['intervals'] !== 1){
             $validatedData['initial'] = 'initialized';
         }
 
         // Check if the request has signature2 and it's not null, and if name_id is 20
         if ($request->filled('name_id') && $validatedData['name_id'] == 20) {
-            // Get the maximum value of to_num from the database
-            $maxToNum = Form::max('to_num');
+            // Get the current year
+            $currentYear = date('Y');
+                
+            // Get the maximum value of 'to_num' for the current year, based on the 'date' field
+            $maxToNum = Form::whereYear('date', $currentYear)->max('to_num');
 
             // Increment the maximum value by 1 to get the next available number
             $newToNum = $maxToNum + 1;
@@ -125,8 +128,11 @@ class FormController extends Controller
 
         // Check if the request has signature2 and it's not null
         if ($request->filled('signature2')) {
-            // Get the maximum value of to_num from the database
-            $maxToNum = Form::max('to_num');
+            // Get the current year
+            $currentYear = date('Y');
+
+            // Get the maximum value of 'to_num' for the current year, based on the 'date' field
+            $maxToNum = Form::whereYear('date', $currentYear)->max('to_num');
 
             // Increment the maximum value by 1 to get the next available number
             $newToNum = $maxToNum + 1;
@@ -137,8 +143,11 @@ class FormController extends Controller
 
         // Check if the request has signature2 and it's not null
         if ($request->filled('signature1') && $request->filled('name_id') && in_array($request->name_id, [15, 21, 45, 48])) {
-            // Get the maximum value of to_num from the database
-            $maxToNum = Form::max('to_num');
+            // Get the current year
+            $currentYear = date('Y');
+
+            // Get the maximum value of 'to_num' for the current year, based on the 'date' field
+            $maxToNum = Form::whereYear('date', $currentYear)->max('to_num');
 
             // Increment the maximum value by 1 to get the next available number
             $newToNum = $maxToNum + 1;

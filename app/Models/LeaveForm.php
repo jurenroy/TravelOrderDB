@@ -37,7 +37,9 @@ class LeaveForm extends Model
         "dayswopay" ,
         "others" ,
         "disapproved",
-        "approval"
+        "approval",
+        "appsig",
+        "appby"
         // 'date' is not included as it's set to auto-populate
     ];
 
