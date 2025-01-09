@@ -75,11 +75,8 @@ class FormController extends Controller
 
         // Check if the request has signature2 and it's not null, and if name_id is 20
         if ($request->filled('name_id') && $validatedData['name_id'] == 20) {
-            // Get the current year
-            $currentYear = date('Y');
-                
-            // Get the maximum value of 'to_num' for the current year, based on the 'date' field
-            $maxToNum = Form::whereYear('date', $currentYear)->max('to_num');
+            // Get the maximum value of to_num from the database
+            $maxToNum = Form::max('to_num');
 
             // Increment the maximum value by 1 to get the next available number
             $newToNum = $maxToNum + 1;
@@ -126,28 +123,24 @@ class FormController extends Controller
             }
         }
 
-        // Check if the request has signature2 and it's not null
         if ($request->filled('signature2')) {
-            // Get the current year
-            $currentYear = date('Y');
-
-            // Get the maximum value of 'to_num' for the current year, based on the 'date' field
-            $maxToNum = Form::whereYear('date', $currentYear)->max('to_num');
+            // Get the maximum value of to_num from the database
+            $maxToNum = Form::max('to_num');
 
             // Increment the maximum value by 1 to get the next available number
             $newToNum = $maxToNum + 1;
 
             // Increment to_num by 301 based on the count
             $form->to_num = $newToNum;
+        
+            // Save the form (if necessary)
+            $form->save();
         }
 
         // Check if the request has signature2 and it's not null
         if ($request->filled('signature1') && $request->filled('name_id') && in_array($request->name_id, [15, 21, 45, 48])) {
-            // Get the current year
-            $currentYear = date('Y');
-
-            // Get the maximum value of 'to_num' for the current year, based on the 'date' field
-            $maxToNum = Form::whereYear('date', $currentYear)->max('to_num');
+            // Get the maximum value of to_num from the database
+            $maxToNum = Form::max('to_num');
 
             // Increment the maximum value by 1 to get the next available number
             $newToNum = $maxToNum + 1;
