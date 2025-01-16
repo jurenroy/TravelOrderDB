@@ -58,7 +58,7 @@ class LeaveFormController extends Controller
             'days' => 'nullable|integer',
             'dates' => 'nullable|date',
             'commutation' => 'nullable|string',
-            'applicant' => 'nullable|integer',
+            'applicant' => 'nullable|string',
             'asof' => 'nullable|string',
             'tevl' => 'nullable|string',
             'tesl' => 'nullable|string',
