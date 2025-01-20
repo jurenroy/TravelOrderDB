@@ -90,6 +90,8 @@ Route::middleware('cors')->get('/get_names_json', function () {
     return response()->json($names);
 });
 
+
+
 Route::get('/add_form', [FormController::class, 'showForm']);
 Route::post('/add_form', [FormController::class, 'submitForm'])->name('submit.form');
 
@@ -97,6 +99,7 @@ Route::post('update_form/{id}', [FormController::class, 'update_via_post']);
 
 Route::get('/add_account', [AccountController::class, 'showForm']);
 Route::post('/add_account', [AccountController::class, 'submitForm'])->name('submit.form');
+Route::post('/acclogin', [AccountController::class, 'acclogin']);
 
 Route::post('update_account/{id}', [AccountController::class, 'update_via_post']);
 

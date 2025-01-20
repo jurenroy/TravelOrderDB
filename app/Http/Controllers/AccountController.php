@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Account;
+use App\Models\Employee;
 
 class AccountController extends Controller
 {
@@ -84,6 +85,44 @@ public function update_via_post(Request $request, $id)
 
     return response()->json(['message' => 'Resource updated successfully']);
 }
+
+
+public function acclogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        // Retrieve the account by email
+        $account = Account::where('email', $request->email)->first();
+
+        if (!$account) {
+            return response()->json(['success' => false, 'message' => 'Email not found'], 404);
+        }
+
+        // Verify the password (plaintext example; replace with hashed logic in production)
+        if ($account->password !== $request->password) {
+            return response()->json(['success' => false, 'message' => 'Invalid password'], 401);
+        }
+
+        // Retrieve employee with matching name_id
+        $employee = Employee::where('name_id', $account->name_id)->first();
+
+        // Check if the account is inactive
+        if (!$employee || $employee->isActive === 'out') {
+            return response()->json(['success' => false, 'message' => 'Account is inactive or employee not found'], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'accountId' => $account->account_id,
+            'typeId' => $account->type_id,
+            'nameId' => $account->name_id,
+            'signature' => $account->signature,
+        ]);
+    }
 
 
 
