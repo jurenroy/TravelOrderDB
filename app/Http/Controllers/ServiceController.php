@@ -26,6 +26,7 @@ class ServiceController extends Controller
             'approvedBy' => 'nullable|integer',
             'servicedBy' => 'nullable|integer',
             'feedback_filled' => 'boolean',
+            'ictnote' => 'nullable|string',
         ]);
 
         // Create the service with blank serviceRequestNo
@@ -64,6 +65,7 @@ class ServiceController extends Controller
             'approvedBy' => 'sometimes|nullable|integer',
             'servicedBy' => 'sometimes|nullable|integer',
             'feedback_filled' => 'sometimes|boolean',
+            'ictnote' => 'sometimes|nullable|string',
         ]);
 
         // Only set serviceRequestNo if remarks is 'Done'

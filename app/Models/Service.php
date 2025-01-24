@@ -22,5 +22,6 @@ class Service extends Model
         'approvedBy',
         'servicedBy',
         'feedback_filled', // Add this line
+        'ictnote'
     ];
 }

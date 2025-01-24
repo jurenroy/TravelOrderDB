@@ -90,8 +90,7 @@ public function update_via_post(Request $request, $id)
 public function acclogin(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+            'email' => 'required',
         ]);
 
         // Retrieve the account by email
@@ -99,11 +98,6 @@ public function acclogin(Request $request)
 
         if (!$account) {
             return response()->json(['success' => false, 'message' => 'Email not found'], 404);
-        }
-
-        // Verify the password (plaintext example; replace with hashed logic in production)
-        if ($account->password !== $request->password) {
-            return response()->json(['success' => false, 'message' => 'Invalid password'], 401);
         }
 
         // Retrieve employee with matching name_id
@@ -115,8 +109,7 @@ public function acclogin(Request $request)
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Login successful',
+            'password' => 'password',
             'accountId' => $account->account_id,
             'typeId' => $account->type_id,
             'nameId' => $account->name_id,
