@@ -7,6 +7,7 @@ use App\Http\Controllers\FormController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\LeaveFormController;
+use App\Http\Controllers\RequestController;
 
 use App\Models\Employee;
 use App\Models\Name;
@@ -17,6 +18,8 @@ use App\Models\Account;
 use App\Models\Type;
 use App\Models\OTP;
 use App\Models\LeaveForm;
+use App\Models\RequestForm;
+
 
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\FeedbackController;
@@ -125,6 +128,12 @@ Route::get('feedbacks', [FeedbackController::class, 'index']); // Read all
 Route::get('feedbacks/{id}', [FeedbackController::class, 'show']); // Read one
 Route::post('feedbacks/update/{id}', [FeedbackController::class, 'update']); // Update
 Route::delete('feedbacks/{id}', [FeedbackController::class, 'destroy']); // Delete
+
+// Route for request
+Route::post('submit_request', [RequestController::class, 'store']); // Create
+Route::get('get_request', [RequestController::class, 'index']); // Read all
+Route::get('show_request/{id}', [RequestController::class, 'show']); // Read one
+Route::post('update_request/{id}', [RequestController::class, 'update']); // Update
 
 // Route to serve images
 Route::get('/storage/{filename}', function ($filename) {
