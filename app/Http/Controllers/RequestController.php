@@ -38,7 +38,7 @@ class RequestController extends Controller
         if (!$request) {
             return response()->json(['message' => 'request not found'], 404);
         }
-        return response()->json($request);
+        return response()->json(requestForm::all());
 
     }
 
@@ -54,6 +54,6 @@ class RequestController extends Controller
 
         $requestForm = requestForm::findOrFail($id);
         $requestForm->update($request->all());
-        return $requestForm;
-    }
+        return response()->json($requestForm);
+    }   
 }
