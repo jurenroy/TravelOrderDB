@@ -17,9 +17,13 @@ use App\Models\Account;
 use App\Models\Type;
 use App\Models\OTP;
 use App\Models\LeaveForm;
+use App\Http\Model\FadrfForm;
 
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\FeedbackController;
+
+use App\Http\Controllers\FadrfController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -125,6 +129,11 @@ Route::get('feedbacks', [FeedbackController::class, 'index']); // Read all
 Route::get('feedbacks/{id}', [FeedbackController::class, 'show']); // Read one
 Route::post('feedbacks/update/{id}', [FeedbackController::class, 'update']); // Update
 Route::delete('feedbacks/{id}', [FeedbackController::class, 'destroy']); // Delete
+//fadrf request
+Route::post('FADRFsubmit_request', [FadrfController::class, 'store']); // Create
+Route::get('FADRFget_request', [FadrfController::class, 'index']); // Read all
+Route::get('FADRFshow_request/{id}', [FadrfController::class, 'show']); // Read one
+Route::post('FADRFupdate_request/{id}', [FadrfController::class, 'update']); // Update
 
 // Route to serve images
 Route::get('/storage/{filename}', function ($filename) {
