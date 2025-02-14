@@ -9,7 +9,7 @@ class RequestForm extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'request_form';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'name_id',

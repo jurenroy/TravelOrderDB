@@ -145,6 +145,6 @@ Route::get('/storage/{filename}', function ($filename) {
 
     $file = File::get($path);
     $type = File::mimeType($path);
-    
+
     return Response::make($file, 200)->header("Content-Type", $type);
 });
