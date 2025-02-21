@@ -21,9 +21,12 @@ class RequestController extends Controller
             'date' => 'required|date',
             'documents' => 'required|array',
             'rating' => 'nullable|integer',
+            'remarks' => 'nullable|string',
         ]);
 
-        $validatedData['documents'] = json_encode($validatedData['documents']);
+        $validatedData['documents'] = json_encode(array_map(function($doc) {
+            return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
+        }, $validatedData['documents']));
 
         // Create a new leave form record with the validated data
         $leaveForm = RequestForm::create($validatedData);
@@ -42,23 +45,43 @@ class RequestController extends Controller
 
     }
 
-    public function update(Request $request, $id)
-    {
-        // Validate only the fields we want to update
+  public function update(Request $request, $id)
+{
+    try {
         $request->validate([
             'rating' => 'nullable|integer',
+            'documents' => 'nullable|array',
+            'remarks' => 'nullable|string', 
         ]);
 
-        // Find the request form by ID
-        $RequestForm = RequestForm::findOrFail($id);
+        $requestForm = RequestForm::findOrFail($id);
+        if ($request->has('rating')) {
+            $requestForm->rating = $request->rating;
+        }
 
-        // Prepare the data to update
-        $dataToUpdate = $request->only(['rating']);
+        if ($request->has('documents')) {
+            $requestForm->documents = json_encode(array_map(function($doc) {
+                return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
+            }, $request->documents));
+        }
 
-        // Update the request form with the new data
-        $RequestForm->update($dataToUpdate);
+        // Update remarks if provided
+        if ($request->has('remarks')) {
+            $requestForm->remarks = $request->remarks; 
+        }
+
+        // Save the updated request form
+        $requestForm->save();
 
         // Return the updated request form as a JSON response
-        return response()->json($RequestForm);
+        return response()->json($requestForm);
+        
+    } catch (\Exception $e) {
+        // Log the error message
+        \Log::error('Error updating request: ' . $e->getMessage());
+
+        // Return a 500 error response with the error message
+        return response()->json(['error' => 'Internal Server Error', 'message' => $e->getMessage()], 500);
     }
+}
 }
