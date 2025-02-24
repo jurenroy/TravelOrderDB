@@ -20,9 +20,15 @@ class FadrfController extends Controller
             'date' => 'required|date_format:Y-m-d H:i:s',
             'documents'=> 'required|array',
             'rating'=> 'nullable|integer',
+            'remarks'=> 'nullable|string',
+            'note'=> 'nullable|string',
         ]);
 
-        $validatedData['documents'] = json_encode($validatedData['documents']);
+        $validatedData['documents'] = json_encode(array_map(function($doc) {
+            return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
+        }, $validatedData['documents']));
+         
+       
         $leaveForm = FadrfForm::create($validatedData);
         return response()->json($leaveForm,  201);
     }
@@ -36,17 +42,42 @@ class FadrfController extends Controller
     }
     public function update(Request $request, $id)
     {
+        try{
         $request->validate([
-            'rating'=>'nullable|integer'
+            'rating'=>'nullable|integer',
+            'documents'=> 'nullable|array',
+            'remarks'=> 'nullable|string',
+            'note'=> 'nullable|string',
         ]);
 
         $FadrfForm = FadrfForm::findOrFail($id);
+        if ($request->has('rating')){
+            $FadrfForm->rating = $request->rating;
+        }
 
-        $dataToUpdate = $request->only(['rating']);
+        if ($request->has('documents')){
+            $FadrfForm->documents = json_encode(array_map(function($doc) {
+                return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
+            }, $request->documents));
+        }
 
-        $FadrfForm->update($dataToUpdate);
+        if ($request->has('remarks')){
+            $FadrfForm->remarks = $request->remarks;
+        }
+
+        if ($request->has('note')){
+            $FadrfForm->note = $request->note;
+        }
+
+        $FadrfForm->save();
+
 
         return response()->json($FadrfForm);
-    }
 
+    } catch (\Exception $e){
+        \Log::error('Error updating request: '.$e->getMessage());
+
+        return response()->json(['error'=> 'Internal Server Error', 'message'=> $e->getMessage()], 500);
+    }
+}
 }

@@ -16,6 +16,8 @@ class FadrfForm extends Model
         'date',
         'documents',
         'rating',
+        'remarks',
+        'note'
     ] ;
     protected $table = 'fad_rf_form';
 }
