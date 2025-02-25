@@ -22,18 +22,18 @@ class RequestController extends Controller
             'documents' => 'required|array',
             'rating' => 'nullable|integer',
             'remarks' => 'nullable|string',
+            'note' => 'nullable|string',
         ]);
-
-        $validatedData['documents'] = json_encode(array_map(function($doc) {
-            return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
-        }, $validatedData['documents']));
-
-        // Create a new leave form record with the validated data
-        $leaveForm = RequestForm::create($validatedData);
-
-        return response()->json($leaveForm, 201);
+    
+        // Store documents with all data (name + remarks)
+        $validatedData['documents'] = json_encode($validatedData['documents']);
+    
+        // Create a new request form record with the validated data
+        $requestForm = RequestForm::create($validatedData);
+    
+        return response()->json($requestForm, 201);
     }
-
+    
     public function show($id)
     {
 
@@ -45,43 +45,45 @@ class RequestController extends Controller
 
     }
 
-  public function update(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'rating' => 'nullable|integer',
-            'documents' => 'nullable|array',
-            'remarks' => 'nullable|string', 
-        ]);
-
-        $requestForm = RequestForm::findOrFail($id);
-        if ($request->has('rating')) {
-            $requestForm->rating = $request->rating;
+    public function update(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'rating' => 'nullable|integer',
+                'documents' => 'nullable|array',
+                'remarks' => 'nullable|string',
+                'note' => 'nullable|string',
+            ]);
+    
+            $requestForm = RequestForm::findOrFail($id);
+    
+            if ($request->has('rating')) {
+                $requestForm->rating = $request->rating;
+            }
+    
+            // Keep full documents (with remarks)
+            if ($request->has('documents')) {
+                $requestForm->documents = json_encode($request->documents);
+            }
+    
+            if ($request->has('remarks')) {
+                $requestForm->remarks = $request->remarks;
+            }
+    
+            if ($request->has('note')) {
+                $requestForm->note = $request->note;
+            }
+    
+            // Save the updated request form
+            $requestForm->save();
+    
+            return response()->json($requestForm);
+    
+        } catch (\Exception $e) {
+            \Log::error('Error updating request: ' . $e->getMessage());
+    
+            return response()->json(['error' => 'Internal Server Error', 'message' => $e->getMessage()], 500);
         }
-
-        if ($request->has('documents')) {
-            $requestForm->documents = json_encode(array_map(function($doc) {
-                return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
-            }, $request->documents));
-        }
-
-        // Update remarks if provided
-        if ($request->has('remarks')) {
-            $requestForm->remarks = $request->remarks; 
-        }
-
-        // Save the updated request form
-        $requestForm->save();
-
-        // Return the updated request form as a JSON response
-        return response()->json($requestForm);
-        
-    } catch (\Exception $e) {
-        // Log the error message
-        \Log::error('Error updating request: ' . $e->getMessage());
-
-        // Return a 500 error response with the error message
-        return response()->json(['error' => 'Internal Server Error', 'message' => $e->getMessage()], 500);
     }
-}
+    
 }

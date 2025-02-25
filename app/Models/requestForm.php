@@ -18,6 +18,7 @@ class RequestForm extends Model
         'documents',
         'rating',
         'remarks',
+        'note',
     ];
 
     protected $table = 'request_form';
