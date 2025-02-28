@@ -116,25 +116,31 @@ class FormController extends Controller
                       ->where('initial', 'initialized'); // Add condition for "initial" to be "initialized"
             }
         }
-        else if (in_array($name_id, [23, 64])){
+        else if (in_array($name_id, [23, 64])) {
             // Filter based on selected status
             if ($status === 'Me') {
                 // Return forms where name_id matches the user's name_id
                 $query->where('name_id', $name_id);
-            }  // Filter based on selected status
+            }  
+            // Filter based on selected status
             else if ($status === 'Pending') {
                 // Return forms where name_id matches the user's name_id
-                $query->where('name_id', $name_id)
-                      ->whereNull('signature2'); // Add condition for "signature2" to be not null
-
-            } // Filter based on selected status
-            else  if ($status === 'Done') {
+                $query->whereNotNull('note') // Ensure note is not null
+                      ->where('note', 'like', '%KAYSHE JOY F. PELINGON%') // Check if note contains the specified string
+                      ->where('note', 'not like', '%ASHLEY%') // Exclude notes containing this name
+                      ->where('note', 'not like', '%DULCE%'); // Exclude notes containing this name
+            } 
+            // Filter based on selected status
+            else if ($status === 'Done') {
                 // Return forms where name_id matches the user's name_id
-                $query->where('name_id', $name_id)
-                      ->whereNotNull('signature2'); // Add condition for "signature2" to be not null
-
+                $query->whereNotNull('note') // Ensure note is not null
+                      ->where(function($query) {
+                          $query->where('note', 'like', '%ASHLEY%') // Include notes containing this name
+                                ->orWhere('note', 'like', '%DULCE%'); // Include notes containing this name
+                      });
             }
-        }// Check if the user is a oic
+        }
+    // Check if the user is a oic
         else if (in_array($name_id, $chiefNameIds)) {
             $index = array_search($name_id, $chiefNameIds);
             $division = $chiefDivisionIds[$index];
