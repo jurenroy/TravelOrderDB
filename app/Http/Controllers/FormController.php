@@ -38,7 +38,7 @@ class FormController extends Controller
         $members = [
             [23, 25, 35, 70, 64,78], //Perater 39
             [30, 7, 26, 18, 67, 49, 24], //Alvarez 2 
-            [43, 40], //Asis 3
+            [43, 40,71,81], //Asis 3
             [32, 50, 71], //Bondad 8 
             [33, 6], //Serojales 42
             [41, 46], //Orteza 34
