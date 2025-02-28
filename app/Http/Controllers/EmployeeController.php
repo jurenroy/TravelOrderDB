@@ -16,6 +16,19 @@ class EmployeeController extends Controller
         $employees = Employee::all();
         return response()->json($employees);
     }
+    // Retrieve a specific feedback
+    public function show($name_id)
+    {
+        // Fetch employee by name_id
+        $employee = Employee::where('name_id', $name_id)->first(); // Using where to match name_id
+
+        if (!$employee) {
+            return response()->json(['message' => 'Employee not found'], 404); // Adjusted message
+        }
+
+        return response()->json($employee);
+    }
+
     public function store(Request $request)
     {
         // Validate the incoming request data

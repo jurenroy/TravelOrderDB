@@ -7,6 +7,97 @@ use App\Models\Service;
 
 class ServiceController extends Controller
 {
+
+    public function showService($name_id, $status, $typeOfService, $limit)
+{
+    // Initialize the query
+    $query = Service::query();
+
+    // Apply conditions based on the name_id
+    if (in_array($name_id, [76, 77, 53])) {
+        // Admins can see all services
+        if ($status !== 'all') {
+            if ($status === 'pending') {
+                $query->whereNull('remarks');
+            } elseif ($status === 'approved') {
+                $query->whereNotNull('approvedBy');
+            } elseif ($status === 'disapproved') {
+                $query->whereNotNull('approvedBy')->where('remarks', 'Disapproved');
+            } elseif ($status === 'ongoing') {
+                $query->where('remarks', 'On-going');
+            } elseif ($status === 'done') {
+                $query->where('remarks', 'Done');
+            } elseif ($status === 'kulang') {
+                $query->where('serviceRequestNo', 'TBA');
+            }
+        }
+
+        // Filter by typeOfService if not 'All'
+        if ($typeOfService !== 'all') {
+            $query->where('typeOfService', 'like', '%' . $typeOfService . '%');
+        }
+    } elseif (in_array($name_id, [36])) {
+        // Specific conditions for approvedBy null
+        if ($status !== 'all') {
+            if ($status === 'pending') {
+                $query->whereNull('approvedBy');
+            } elseif ($status === 'approved') {
+                $query->whereNotNull('approvedBy');
+            } elseif ($status === 'disapproved') {
+                $query->whereNotNull('approvedBy')->where('remarks', 'Disapproved');
+            } elseif ($status === 'ongoing') {
+                $query->where('remarks', 'On-going');
+            } elseif ($status === 'done') {
+                $query->where('remarks', 'Done');
+            } elseif ($status === 'kulang') {
+                $query->whereNull('approvedBy');
+            }
+        }
+    } else {
+        // For users who are not admins, filter based on requestedBy
+        $query->where('requestedBy', $name_id);
+        if ($status !== 'all') {
+            // Start the query with the requestedBy condition
+
+            if ($status === 'pending') {
+                $query->where('serviceRequestNo', 'TBA')
+                      ->orWhereNull('approvedBy')
+                      ->where('requestedBy', $name_id)
+                      ->orWhere('feedback_filled', 0)
+                      ->where('requestedBy', $name_id);
+            } elseif ($status === 'approved') {
+                $query->whereNotNull('approvedBy');
+            } elseif ($status === 'disapproved') {
+                $query->whereNotNull('approvedBy')->where('remarks', 'Disapproved');
+            } elseif ($status === 'ongoing') {
+                $query->where('remarks', 'On-going');
+            } elseif ($status === 'done') {
+                $query->where('remarks', 'Done');
+            } elseif ($status === 'kulang') {
+                $query->where('serviceRequestNo', 'TBA')
+                      ->orWhereNull('approvedBy')
+                      ->where('requestedBy', $name_id)
+                      ->orWhere('feedback_filled', 0)
+                      ->where('requestedBy', $name_id);
+            }
+        }
+    }
+
+    // Filter by typeOfService if not 'All'
+    if ($typeOfService !== 'all') {
+        $query->where('typeOfService', 'like', '%' . $typeOfService . '%');
+    }
+
+    // Limit the number of rows returned and order by ID in descending order
+    $feedbacks = $query->orderBy('id', 'desc')->limit($limit)->get();
+
+    // // Check if any feedbacks were found
+    // if ($feedbacks->isEmpty()) {
+    //     return response()->json(['message' => 'No feedback found'], 404);
+    // }
+
+    return response()->json($feedbacks);
+}
     // Retrieve all services
     public function index()
     {

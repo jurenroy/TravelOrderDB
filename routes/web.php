@@ -7,6 +7,7 @@ use App\Http\Controllers\FormController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\LeaveFormController;
+use App\Http\Controllers\NameController;
 
 use App\Models\Employee;
 use App\Models\Name;
@@ -44,6 +45,7 @@ Route::get('/get_employees_json', function () {
     $employee = Employee::all();
     return response()->json($employee);
 });
+Route::get('/get_employees_json/{name_id}', [EmployeeController::class, 'show']);
 
 Route::get('/get_namez_json', function () {
     $names = Name::all();
@@ -64,6 +66,8 @@ Route::get('/get_forms_json', function () {
     $forms = Form::all();
     return response()->json($forms);
 });
+Route::get('get_forms_json/{id}/', [FormController::class, 'show']); // Read specific
+Route::get('get_forms_json/{name_id}/{status}/{limit}', [FormController::class, 'getForm']); // Read specific
 
 Route::get('/get_accounts_json', function () {
     $accounts = Account::all();
@@ -80,6 +84,9 @@ Route::get('/get_otp_json', function () {
     return response()->json($otps);
 });
 
+Route::get('/get_leave_json/{id}', [LeaveFormController::class, 'shows']);
+Route::get('/get_leave_json/{name_id}/{status}/{limit}', [LeaveFormController::class, 'show']);
+
 Route::get('/get_leave_json', function () {
     $leave = LeaveForm::all();
     return response()->json($leave);
@@ -90,9 +97,11 @@ Route::middleware('cors')->get('/get_names_json', function () {
     return response()->json($names);
 });
 
-
+Route::get('get_names_json/{name_id}', [NameController::class, 'show']);
+Route::get('get_accounts_json/{name_id}', [AccountController::class, 'show']);
 
 Route::get('/add_form', [FormController::class, 'showForm']);
+
 Route::post('/add_form', [FormController::class, 'submitForm'])->name('submit.form');
 
 Route::post('update_form/{id}', [FormController::class, 'update_via_post']);
@@ -117,6 +126,7 @@ Route::post('updateleave_form/{id}', [LeaveFormController::class, 'update']);
 Route::post('services', [ServiceController::class, 'store']); // Create
 Route::get('services', [ServiceController::class, 'index']); // Read all
 Route::get('services/{id}', [ServiceController::class, 'show']); // Read one
+Route::get('services/{name_id}/{status?}/{typeOfService?}/{limit}', [ServiceController::class, 'showService']); // Read one
 Route::post('services/update/{id}', [ServiceController::class, 'update']); // Update
 Route::delete('services/{id}', [ServiceController::class, 'destroy']); // Delete
 // Feedback Routes
