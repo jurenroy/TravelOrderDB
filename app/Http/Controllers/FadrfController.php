@@ -24,9 +24,7 @@ class FadrfController extends Controller
             'note'=> 'nullable|string',
         ]);
 
-        $validatedData['documents'] = json_encode(array_map(function($doc) {
-            return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
-        }, $validatedData['documents']));
+        $validatedData['documents'] = json_encode($validatedData['documents']);
          
        
         $leaveForm = FadrfForm::create($validatedData);
@@ -55,12 +53,9 @@ class FadrfController extends Controller
             $FadrfForm->rating = $request->rating;
         }
 
-        if ($request->has('documents')){
-            $FadrfForm->documents = json_encode(array_map(function($doc) {
-                return is_array($doc) ? ($doc['name'] ?? $doc) : $doc;
-            }, $request->documents));
+        if ($request->has('documents')) {
+            $FadrfForm->documents = json_encode($request->documents); // Store all fields, not just name
         }
-
         if ($request->has('remarks')){
             $FadrfForm->remarks = $request->remarks;
         }
