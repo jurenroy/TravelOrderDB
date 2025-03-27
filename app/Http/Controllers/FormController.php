@@ -34,11 +34,11 @@ class FormController extends Controller
         $query = Form::query();
 
         // Define section chief IDs and members
-        $sectionChiefIds = [39, 2, 3, 8, 42, 34, 29, 36, 11, 5, 47];
+        $sectionChiefIds = [39, 2, 8, 42, 34, 29, 36, 11, 5, 47];
         $members = [
             [23, 25, 35, 70, 64,78], //Perater 39
             [30, 7, 26, 18, 67, 49, 24], //Alvarez 2 
-            [43, 40,71,81], //Asis 3
+            //[43, 40,71,81], //Asis 3 disab;e until there is a SC
             [32, 50, 71], //Bondad 8 
             [33, 6], //Serojales 42
             [41, 46], //Orteza 34
@@ -116,25 +116,31 @@ class FormController extends Controller
                       ->where('initial', 'initialized'); // Add condition for "initial" to be "initialized"
             }
         }
-        else if (in_array($name_id, [23, 64])){
+        else if (in_array($name_id, [23, 64])) {
             // Filter based on selected status
             if ($status === 'Me') {
                 // Return forms where name_id matches the user's name_id
                 $query->where('name_id', $name_id);
-            }  // Filter based on selected status
+            }  
+            // Filter based on selected status
             else if ($status === 'Pending') {
                 // Return forms where name_id matches the user's name_id
-                $query->where('name_id', $name_id)
-                      ->whereNull('signature2'); // Add condition for "signature2" to be not null
-
-            } // Filter based on selected status
-            else  if ($status === 'Done') {
+                $query->whereNotNull('note') // Ensure note is not null
+                      ->where('note', 'like', '%KAYSHE JOY F. PELINGON%') // Check if note contains the specified string
+                      ->where('note', 'not like', '%ASHLEY%') // Exclude notes containing this name
+                      ->where('note', 'not like', '%DULCE%'); // Exclude notes containing this name
+            } 
+            // Filter based on selected status
+            else if ($status === 'Done') {
                 // Return forms where name_id matches the user's name_id
-                $query->where('name_id', $name_id)
-                      ->whereNotNull('signature2'); // Add condition for "signature2" to be not null
-
+                $query->whereNotNull('note') // Ensure note is not null
+                      ->where(function($query) {
+                          $query->where('note', 'like', '%ASHLEY%') // Include notes containing this name
+                                ->orWhere('note', 'like', '%DULCE%'); // Include notes containing this name
+                      });
             }
-        }// Check if the user is a oic
+        }
+    // Check if the user is a oic
         else if (in_array($name_id, $chiefNameIds)) {
             $index = array_search($name_id, $chiefNameIds);
             $division = $chiefDivisionIds[$index];
@@ -249,9 +255,11 @@ class FormController extends Controller
                           ->whereNull('signature1')
                           ->where('intervals', 0)
                           ->where('name_id', '!=', $name_id)
+                          ->where('name_id', '!=', 45)
                           ->orWhere(function($query) use ($division, $name_id){
                                 $query->where('division_id', $division)
                                   ->where('name_id', '!=', $name_id)
+                                  ->where('name_id', '!=', 45)
                                   ->whereNull('initial') // Check if signature2 is NULL
                                   ->where('intervals', 1)
                                    
@@ -443,6 +451,22 @@ class FormController extends Controller
                 $query->whereNotNull('signature2'); // Add condition for "signature2" to be not null
             }
         }
+        else if ($name_id == 24){
+            // Filter based on selected status
+            if ($status === 'Me') {
+                // Return forms where name_id matches the user's name_id
+                $query->where('name_id', $name_id);
+            }  // Filter based on selected status
+            else if ($status === 'Pending') {
+                // Return forms where name_id matches the user's name_id
+                $query->where('name_id', $name_id)
+                      ->whereNull('signature2'); // Add condition for "signature2" to be not null
+            } // Filter based on selected status
+            else  if ($status === 'Done') {
+                // Return forms where name_id matches the user's name_id
+                $query->whereNotNull('signature2'); // Add condition for "signature2" to be not null
+            }
+        }
         else{
             // Filter based on selected status
             if ($status === 'Me') {
@@ -462,11 +486,12 @@ class FormController extends Controller
             }
         }
         
-        // Get the filtered results with a limit
-    $forms = $query->limit($limit)->get(); // Apply the limit here
-    
+        // Get the filtered results with a limit, ordered descending by 'created_at'
+        $forms = $query->orderBy('travel_order_id', 'desc')->limit($limit)->get(); // Apply the limit here
+
         // Return the results as JSON
         return response()->json($forms);
+
     }
 
     public function submitForm(Request $request)
@@ -512,7 +537,7 @@ class FormController extends Controller
             13,10,37,62,53,4,56,58,55,60,59,20,77
         ];
         $validSCNameIds = [
-            39,2,3,8,42,34,29,36,11,5,47, 52,51,66,17,72,73,54,80
+            39,2,3,8,42,34,29,36,11,5,47, 52,51,66,17,72,73,54,80, 43,40,71,81
         ];
         $validDCNameIds = [
             48,15,45,21
