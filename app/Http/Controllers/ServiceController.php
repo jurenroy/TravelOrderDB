@@ -18,7 +18,7 @@ class ServiceController extends Controller
         // Admins can see all services
         if ($status !== 'all') {
             if ($status === 'pending') {
-                $query->whereNull('remarks');
+                $query->where('serviceRequestNo', 'TBA');
             } elseif ($status === 'approved') {
                 $query->whereNotNull('approvedBy');
             } elseif ($status === 'disapproved') {

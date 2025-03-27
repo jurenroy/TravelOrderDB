@@ -89,15 +89,6 @@ class LeaveFormController extends Controller
                 $query->where('name_id', $name_id);
             } elseif ($status === 'Pending') {
                 $query->whereNotNull('asof')
-                      ->orWhereNotNull('tevl')
-                      ->orWhereNotNull('tesl')
-                      ->orWhereNotNull('ltavl')
-                      ->orWhereNotNull('ltasl')
-                      ->orWhereNotNull('bvl')
-                      ->orWhereNotNull('vsl')
-                      ->orWhereNotNull('dayswpay')
-                      ->orWhereNotNull('dayswopay')
-                      ->orWhereNotNull('others')
                       ->whereNull('certification');
             } elseif ($status === 'Done') {
                 $query->whereNotNull('certification');
@@ -148,8 +139,9 @@ class LeaveFormController extends Controller
                 if ($division == 5) {
                     $query->whereNotNull('appsig');
                 } else {
-                    $query->whereNotNull('appsig')
-                      -> where('appby', $name_id);
+                    $query->whereIn('name_id', $divisionMembersIds)
+                    ->whereNotNull('recommendation')
+                    ->where('name_id', '!=', $name_id);
                 }
             }
         }  else if ($name_id == 76){
@@ -181,7 +173,7 @@ class LeaveFormController extends Controller
             }
         }
     
-        return $query->limit($limit)->get(); // Apply the limit here
+        return $query->orderBy('leaveform_id', 'desc')->limit($limit)->get(); // Apply the limit here
     }
 
     public function store(Request $request)
