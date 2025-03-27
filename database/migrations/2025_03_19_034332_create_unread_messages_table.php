@@ -13,8 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('division', function (Blueprint $table) {
-            $table->bigIncrements('division_id');
+        Schema::create('unread_messages', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('name_id'); // References name_id in names table
+            $table->unsignedBigInteger('message_id'); // References id in messages table
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('division');
+        Schema::dropIfExists('unread_messages');
     }
 };

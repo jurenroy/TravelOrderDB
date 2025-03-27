@@ -22,6 +22,8 @@ use App\Models\LeaveForm;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\FeedbackController;
 
+use App\Http\Controllers\MessageController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -135,6 +137,11 @@ Route::get('feedbacks', [FeedbackController::class, 'index']); // Read all
 Route::get('feedbacks/{id}', [FeedbackController::class, 'show']); // Read one
 Route::post('feedbacks/update/{id}', [FeedbackController::class, 'update']); // Update
 Route::delete('feedbacks/{id}', [FeedbackController::class, 'destroy']); // Delete
+
+Route::post('message', [MessageController::class, 'store']); // Create
+Route::get('message/{user1_id}/{user2_id}', [MessageController::class, 'index']); // Read all
+Route::get('message/{user1_id}/', [MessageController::class, 'indexer']); // Read all
+Route::get('readmessage/{sender_id}/{receiver_id}/', [MessageController::class, 'markAsRead']); // Read all
 
 // Route to serve images
 Route::get('/storage/{filename}', function ($filename) {

@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie','/add_form', 'update_form/*', 'get_names_json/', 'get_namez_json/', 'get_positions_json/', 'get_divisions_json/', 'get_employees_json/', 'get_forms_json/', 'add_account/', 'update_account/*', 'get_accounts_json', 'get_type_json', '/send-otp/*','/get_otp_json','/update_employee/*','/add_employees', 'edit_employee','/storage/images/*','*','/addleave_form','updateleave_form/*','acclogin'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie','/add_form', 'update_form/*', 'get_names_json/', 'get_namez_json/', 'get_positions_json/', 'get_divisions_json/', 'get_employees_json/', 'get_forms_json/', 'add_account/', 'update_account/*', 'get_accounts_json', 'get_type_json', '/send-otp/*','/get_otp_json','/update_employee/*','/add_employees', 'edit_employee','/storage/images/*','*','/addleave_form','updateleave_form/*','acclogin', 'message'],
 
     'allowed_methods' => ['*'],
 

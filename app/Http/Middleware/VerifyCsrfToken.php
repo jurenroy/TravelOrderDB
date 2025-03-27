@@ -33,6 +33,7 @@ class VerifyCsrfToken extends Middleware
         '/storage/images/*',
         '/addleave_form',
         'updateleave_form/*',
+        'message',
         '*'
         //
     ];

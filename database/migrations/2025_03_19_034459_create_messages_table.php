@@ -13,9 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('type', function (Blueprint $table) {
-            $table->bigIncrements('type_id');
-            $table->string('type_name');
+        Schema::create('messages', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('sender_id'); // References name_id in names table
+            $table->unsignedBigInteger('receiver_id'); // References name_id in names table
+            $table->text('content');
+            $table->timestamps();
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('type');
+        Schema::dropIfExists('messages');
     }
 };
