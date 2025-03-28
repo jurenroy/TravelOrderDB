@@ -10,8 +10,10 @@ class FadrfController extends Controller
 {
     public function index(Request $request)
     {
-        $limit = min($request->input('limit', 10), 100); // Limit to a maximum of 100 records
-        return response()->json(FadrfForm::limit($limit)->get());
+        $limit = min($request->input('limit', 10), 10000); 
+        return response()->json(FadrfForm::orderBy('created_at', 'desc')
+        ->limit($limit)
+        ->get());
     }
     public function store(Request $request)
     {
