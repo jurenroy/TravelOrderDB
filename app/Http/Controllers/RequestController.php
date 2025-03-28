@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 
 class RequestController extends Controller
 {
-    public function index()
-    {
-        return response()->json(RequestForm::all());
+    public function index(Request $request) {
+        $limit = min($request->input('limit', 10), 100);
+        return response()->json(RequestForm::limit($limit)->get());
     }
 
     public function store(Request $request)
