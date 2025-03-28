@@ -9,8 +9,12 @@ use Illuminate\Http\Request;
 class RequestController extends Controller
 {
     public function index(Request $request) {
-        $limit = min($request->input('limit', 10), 100);
-        return response()->json(RequestForm::limit($limit)->get());
+        $limit = min($request->input('limit', 10), 10000);
+        return response()->json(
+            RequestForm::orderBy('created_at', 'desc') // Order by most recent first
+                ->limit($limit)
+                ->get()
+        );
     }
 
     public function store(Request $request)
