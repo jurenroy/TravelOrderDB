@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 
 class FadrfController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(FadrfForm::all());
+        $limit = min($request->input('limit', 10), 100); // Limit to a maximum of 100 records
+        return response()->json(FadrfForm::limit($limit)->get());
     }
     public function store(Request $request)
     {
