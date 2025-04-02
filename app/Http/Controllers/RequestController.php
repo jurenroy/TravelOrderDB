@@ -10,11 +10,20 @@ class RequestController extends Controller
 {
     public function index(Request $request) {
         $limit = min($request->input('limit', 10), 10000);
-        return response()->json(
-            RequestForm::orderBy('created_at', 'desc') // Order by most recent first
-                ->limit($limit)
-                ->get()
-        );
+        $nameId = $request->input('name_id'); 
+        $query = RequestForm::orderBy('created_at', 'desc');
+
+
+        if ($nameId) {
+            if ($nameId == "2" || $nameId == "76") {
+               
+            } else {
+                
+                $query->where('name_id', $nameId);
+            }
+        }
+    
+        return response()->json($query->limit($limit)->get());
     }
 
     public function store(Request $request)
@@ -60,6 +69,15 @@ class RequestController extends Controller
             ]);
 
             $requestForm = RequestForm::findOrFail($id);
+
+            $userId = auth()->id();
+
+            // Check if the user is allowed to rate the request
+            if (($userId == 2 || $userId == 76) && $userId !== $requestForm->name_id) {
+                return response()->json([
+                    'error' => 'You can only rate your own request.'
+                ], 403);
+            }
 
             if ($request->has('rating')) {
                 $requestForm->rating = $request->rating;
