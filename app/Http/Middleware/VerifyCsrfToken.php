@@ -37,6 +37,10 @@ class VerifyCsrfToken extends Middleware
         'get_request/',
         'show_request/*',
         'update_request/*',
+        'FADRFsubmit_request/',
+        'FADRFget_request/',
+        'FADRFshow_request/*',
+        'FADRFupdate_request/*',
         '*'
         //
     ];
