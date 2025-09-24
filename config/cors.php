@@ -15,11 +15,12 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie','/add_form', 'update_form/*', 'get_names_json/', 'get_namez_json/', 'get_positions_json/', 'get_divisions_json/', 'get_employees_json/', 'get_forms_json/', 'add_account/', 'update_account/*', 'get_accounts_json', 'get_type_json', '/send-otp/*','/get_otp_json','/update_employee/*','/add_employees', 'edit_employee','/storage/images/*','*','/addleave_form','updateleave_form/*','acclogin', 'message'],
 
+    'paths' => ['api/*', 'sanctum/csrf-cookie','/add_form', 'update_form/*', 'get_names_json/', 'get_namez_json/', 'get_positions_json/', 'get_divisions_json/', 'get_employees_json/', 'get_forms_json/', 'add_account/', 'update_account/*', 'get_accounts_json', 'get_type_json', '/send-otp/*','/get_otp_json','/update_employee/*','/add_employees', 'edit_employee','/storage/images/*','*','/addleave_form','updateleave_form/*','acclogin', 'submit_request/','get_request/', 'show_request/*','update_request/*', 'FADRFsubmit_request/', 'FADRFget_request/','FADRFshow_request/*','FADRFupdate_request/', 'message'],
+   
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*', 'http://202.137.117.84:8010', 'http://172.31.10.35:8010'],
+    'allowed_origins' => ['*', 'http://202.137.117.84:8010', 'http://172.31.10.35:8010', 'http://172.31.10.34:8010',],
 
     'allowed_origins_patterns' => [],
 

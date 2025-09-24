@@ -8,6 +8,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OTPController;
 use App\Http\Controllers\LeaveFormController;
 use App\Http\Controllers\NameController;
+use App\Http\Controllers\RequestController;
 
 use App\Models\Employee;
 use App\Models\Name;
@@ -18,11 +19,16 @@ use App\Models\Account;
 use App\Models\Type;
 use App\Models\OTP;
 use App\Models\LeaveForm;
+use App\Models\RequestForm;
+
+use App\Http\Model\FadrfForm;
 
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\FeedbackController;
 
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\FadrfController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +75,7 @@ Route::get('/get_forms_json', function () {
     return response()->json($forms);
 });
 Route::get('get_forms_json/{id}/', [FormController::class, 'show']); // Read specific
-Route::get('get_forms_json/{name_id}/{status}/{limit}', [FormController::class, 'getForm']); // Read specific
+Route::get('get_forms_json/{name_id}/{status}/{limit}/{offset}', [FormController::class, 'getForm']); // Read specific
 
 Route::get('/get_accounts_json', function () {
     $accounts = Account::all();
@@ -87,7 +93,7 @@ Route::get('/get_otp_json', function () {
 });
 
 Route::get('/get_leave_json/{id}', [LeaveFormController::class, 'shows']);
-Route::get('/get_leave_json/{name_id}/{status}/{limit}', [LeaveFormController::class, 'show']);
+Route::get('/get_leave_json/{name_id}/{status}/{limit}/{offset}', [LeaveFormController::class, 'show']);
 
 Route::get('/get_leave_json', function () {
     $leave = LeaveForm::all();
@@ -128,7 +134,7 @@ Route::post('updateleave_form/{id}', [LeaveFormController::class, 'update']);
 Route::post('services', [ServiceController::class, 'store']); // Create
 Route::get('services', [ServiceController::class, 'index']); // Read all
 Route::get('services/{id}', [ServiceController::class, 'show']); // Read one
-Route::get('services/{name_id}/{status?}/{typeOfService?}/{limit}', [ServiceController::class, 'showService']); // Read one
+Route::get('services/{name_id}/{status?}/{typeOfService?}/{limit}/{offset}', [ServiceController::class, 'showService']); // Read one
 Route::post('services/update/{id}', [ServiceController::class, 'update']); // Update
 Route::delete('services/{id}', [ServiceController::class, 'destroy']); // Delete
 // Feedback Routes
@@ -137,13 +143,38 @@ Route::get('feedbacks', [FeedbackController::class, 'index']); // Read all
 Route::get('feedbacks/{id}', [FeedbackController::class, 'show']); // Read one
 Route::post('feedbacks/update/{id}', [FeedbackController::class, 'update']); // Update
 Route::delete('feedbacks/{id}', [FeedbackController::class, 'destroy']); // Delete
+//fadrf request
+Route::post('FADRFsubmit_request', [FadrfController::class, 'store']); // Create
+Route::get('FADRFget_request', [FadrfController::class, 'index']); // Read all
+Route::get('FADRFshow_request/{id}', [FadrfController::class, 'show']); // Read one
+Route::post('FADRFupdate_request/{id}', [FadrfController::class, 'update']); // Update
+
+// Route for request
+Route::post('submit_request', [RequestController::class, 'store']); // Create
+Route::get('get_request', [RequestController::class, 'index']); // Read all
+Route::get('show_request/{id}', [RequestController::class, 'show']); // Read one
+Route::post('update_request/{id}', [RequestController::class, 'update']); // Update
 
 Route::post('message', [MessageController::class, 'store']); // Create
 Route::get('message/{user1_id}/{user2_id}', [MessageController::class, 'index']); // Read all
 Route::get('message/{user1_id}/', [MessageController::class, 'indexer']); // Read all
 Route::get('readmessage/{sender_id}/{receiver_id}/', [MessageController::class, 'markAsRead']); // Read all
 
-// Route to serve images
+// Specific route for files in the 'ictrequest' folder
+Route::get('/storage/ictrequest/{filename}', function ($filename) {
+    $path = storage_path('app/public/ictrequest/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    return Response::make($file, 200)->header("Content-Type", $type);
+});
+
+// General route for all other files in the 'images' folder
 Route::get('/storage/{filename}', function ($filename) {
     $path = storage_path('app/public/images/' . $filename);
 
@@ -153,6 +184,6 @@ Route::get('/storage/{filename}', function ($filename) {
 
     $file = File::get($path);
     $type = File::mimeType($path);
-    
+
     return Response::make($file, 200)->header("Content-Type", $type);
 });
