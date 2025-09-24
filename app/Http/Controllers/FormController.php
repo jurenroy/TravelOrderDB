@@ -28,7 +28,7 @@ class FormController extends Controller
         return response()->json($employee);
     }
 
-    public function getForm($name_id, $status, $limit)
+    public function getForm($name_id, $status, $limit, $offset)
     {
         // Start building the query
         $query = Form::query();
@@ -487,7 +487,7 @@ class FormController extends Controller
         }
         
         // Get the filtered results with a limit, ordered descending by 'created_at'
-        $forms = $query->orderBy('travel_order_id', 'desc')->limit($limit)->get(); // Apply the limit here
+        $forms = $query->orderBy('travel_order_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here
 
         // Return the results as JSON
         return response()->json($forms);

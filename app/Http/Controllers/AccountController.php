@@ -33,8 +33,8 @@ class AccountController extends Controller
 {
     // Validate form data including signature image
     $validatedData = $request->validate([
-        'type_id' => 'required|string',
-        'name_id' => 'required|string',
+        'type_id' => 'required|integer',
+        'name_id' => 'required|integer',
         'email' => 'required|string',
         'password' => 'required|string',
         'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Signature is optional

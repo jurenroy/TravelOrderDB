@@ -24,7 +24,7 @@ class LeaveFormController extends Controller
 
 
     // Retrieve a specific service
-    public function show($name_id, $status, $limit)
+    public function show($name_id, $status, $limit, $offset)
     {
         $query = LeaveForm::query();
         // Retrieve employees where rd is not null
@@ -173,7 +173,7 @@ class LeaveFormController extends Controller
             }
         }
     
-        return $query->orderBy('leaveform_id', 'desc')->limit($limit)->get(); // Apply the limit here
+        return $query->orderBy('leaveform_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here
     }
 
     public function store(Request $request)
