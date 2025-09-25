@@ -37,13 +37,16 @@ class FeedbackController extends Controller
         return response()->json($feedback, 201);
     }
 
-    // Retrieve a specific feedback
+    // Retrieve feedback based on id, but query by referenceid
     public function show($id)
     {
-        $feedback = Feedback::find($id);
+        // Find feedback where referenceid matches the id parameter
+        $feedback = Feedback::where('referenceid', $id)->first();
+        
         if (!$feedback) {
-            return response()->json(['message' => 'Feedback not found'], 404);
+            return response()->json(['message' => 'Feedback not found for the given referenceid'], 404);
         }
+        
         return response()->json($feedback);
     }
 
