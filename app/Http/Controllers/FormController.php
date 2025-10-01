@@ -34,14 +34,14 @@ class FormController extends Controller
         $query = Form::query();
 
         // Define section chief IDs and members
-        $sectionChiefIds = [39, 2, 8, 42, 34, 29, 36, 11, 5, 47];
+        $sectionChiefIds = [39, 2,43, 8, 42, 34, 29, 36, 11, 5, 47];
         $members = [
-            [23, 25, 35, 70, 64,78], //Perater 39
-            [30, 7, 26, 18, 67, 49, 24], //Alvarez 2 
-            //[43, 40,71,81], //Asis 3 disab;e until there is a SC
+            [23, 25, 35, 70, 64,67,78], //Perater 39
+            [30, 7, 26, 18, 49, 24, 84, 85,68,69], //Alvarez 2 
+            [40,71,81], //Silverio 43
             [32, 50, 71], //Bondad 8 
             [33, 6], //Serojales 42
-            [41, 46], //Orteza 34
+            [41, 46,89], //Orteza 34
             [38, 65, 1, 28], //Ligas 29
             [44, 22, 61, 27], //Paulma 36
             [31], //Cajegas 11
@@ -537,7 +537,7 @@ class FormController extends Controller
             13,10,37,62,53,4,56,58,55,60,59,20,77
         ];
         $validSCNameIds = [
-            39,2,3,8,42,34,29,36,11,5,47, 52,51,66,17,72,73,54,80, 43,40,71,81
+            39,2,3,8,42,34,29,36,11,5,47, 52,51,66,17,72,73,54,80, 43,40,71,82,81,83,87,88,79
         ];
         $validDCNameIds = [
             48,15,45,21

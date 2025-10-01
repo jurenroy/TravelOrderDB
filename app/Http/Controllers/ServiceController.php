@@ -36,7 +36,7 @@ class ServiceController extends Controller
         if ($typeOfService !== 'all') {
             $query->where('typeOfService', 'like', '%' . $typeOfService . '%');
         }
-    } elseif (in_array($name_id, [36])) {
+    } elseif (in_array($name_id, [66])) {
         // Specific conditions for approvedBy null
         if ($status !== 'all') {
             if ($status === 'pending') {
