@@ -24,7 +24,7 @@ class LeaveFormController extends Controller
 
 
     // Retrieve a specific service
-    public function show($name_id, $status, $limit, $offset)
+    public function show($name_id, $status, $limit, $offset, $countOnly = false)
     {
         $query = LeaveForm::query();
         // Retrieve employees where rd is not null
@@ -172,8 +172,18 @@ class LeaveFormController extends Controller
                       });
             }
         }
-    
+
+        // If we only need the count, return it directly
+    if ($countOnly) {
+        return $query->count();
+    }
         return $query->orderBy('leaveform_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here
+    }
+
+    public function getCount($name_id)
+    {
+        // Call the getForm method with 'Pending' status and only ask for the count
+        return $this->show($name_id, 'Pending', 0, 0, true);
     }
 
     public function store(Request $request)

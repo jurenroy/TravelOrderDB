@@ -8,7 +8,7 @@ use App\Models\Service;
 class ServiceController extends Controller
 {
 
-    public function showService($name_id, $status, $typeOfService, $limit, $offset)
+    public function showService($name_id, $status, $typeOfService, $limit, $offset, $countOnly = false)
 {
     // Initialize the query
     $query = Service::query();
@@ -88,6 +88,11 @@ class ServiceController extends Controller
         $query->where('typeOfService', 'like', '%' . $typeOfService . '%');
     }
 
+    // If we only need the count, return it directly
+    if ($countOnly) {
+        return $query->count();
+    }
+
     // Limit the number of rows returned and order by ID in descending order
     $feedbacks = $query->orderBy('id', 'desc')->offset($offset)->limit($limit)->get();
 
@@ -97,6 +102,12 @@ class ServiceController extends Controller
     // }
 
     return response()->json($feedbacks);
+}
+
+public function getCount($name_id)
+{
+    // Call the getForm method with 'Pending' status and only ask for the count
+    return $this->showService($name_id, 'kulang', 'all', 0, 0, true);
 }
     // Retrieve all services
     public function index()

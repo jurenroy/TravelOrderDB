@@ -76,6 +76,7 @@ Route::get('/get_forms_json', function () {
 });
 Route::get('get_forms_json/{id}/', [FormController::class, 'show']); // Read specific
 Route::get('get_forms_json/{name_id}/{status}/{limit}/{offset}', [FormController::class, 'getForm']); // Read specific
+Route::get('get_forms_json/{name_id}/count', [FormController::class, 'getCount']); // Read specific
 
 Route::get('/get_accounts_json', function () {
     $accounts = Account::all();
@@ -94,6 +95,7 @@ Route::get('/get_otp_json', function () {
 
 Route::get('/get_leave_json/{id}', [LeaveFormController::class, 'shows']);
 Route::get('/get_leave_json/{name_id}/{status}/{limit}/{offset}', [LeaveFormController::class, 'show']);
+Route::get('/get_leave_json/{name_id}/count', [LeaveFormController::class, 'getCount']); // Read specific
 
 Route::get('/get_leave_json', function () {
     $leave = LeaveForm::all();
@@ -135,6 +137,7 @@ Route::post('services', [ServiceController::class, 'store']); // Create
 Route::get('services', [ServiceController::class, 'index']); // Read all
 Route::get('services/{id}', [ServiceController::class, 'show']); // Read one
 Route::get('services/{name_id}/{status?}/{typeOfService?}/{limit}/{offset}', [ServiceController::class, 'showService']); // Read one
+Route::get('services/{name_id}/count', [ServiceController::class, 'getCount']); // Read specific
 Route::post('services/update/{id}', [ServiceController::class, 'update']); // Update
 Route::delete('services/{id}', [ServiceController::class, 'destroy']); // Delete
 // Feedback Routes

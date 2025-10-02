@@ -28,7 +28,7 @@ class FormController extends Controller
         return response()->json($employee);
     }
 
-    public function getForm($name_id, $status, $limit, $offset)
+    public function getForm($name_id, $status, $limit, $offset, $countOnly = false)
     {
         // Start building the query
         $query = Form::query();
@@ -485,6 +485,11 @@ class FormController extends Controller
                       ->whereNotNull('signature2'); // Add condition for "signature2" to be not null
             }
         }
+
+        // If we only need the count, return it directly
+    if ($countOnly) {
+        return $query->count();
+    }
         
         // Get the filtered results with a limit, ordered descending by 'created_at'
         $forms = $query->orderBy('travel_order_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here
@@ -493,6 +498,12 @@ class FormController extends Controller
         return response()->json($forms);
 
     }
+
+    public function getCount($name_id)
+{
+    // Call the getForm method with 'Pending' status and only ask for the count
+    return $this->getForm($name_id, 'Pending', 0, 0, true);
+}
 
     public function submitForm(Request $request)
     {
