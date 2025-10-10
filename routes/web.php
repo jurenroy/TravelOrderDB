@@ -29,6 +29,8 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FadrfController;
 
+use App\Http\Controllers\CalendarController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -162,6 +164,8 @@ Route::post('message', [MessageController::class, 'store']); // Create
 Route::get('message/{user1_id}/{user2_id}', [MessageController::class, 'index']); // Read all
 Route::get('message/{user1_id}/', [MessageController::class, 'indexer']); // Read all
 Route::get('readmessage/{sender_id}/{receiver_id}/', [MessageController::class, 'markAsRead']); // Read all
+
+Route::get('api/calendar/events', [CalendarController::class, 'index']);
 
 // Specific route for files in the 'ictrequest' folder
 Route::get('/storage/ictrequest/{filename}', function ($filename) {
