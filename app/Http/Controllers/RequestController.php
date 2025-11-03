@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\RequestForm;
 use Illuminate\Http\Request;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Http;
 
 class RequestController extends Controller
 {
@@ -97,7 +99,22 @@ class RequestController extends Controller
             }
 
             
+            $oldValues = $requestForm->toArray();
+
             $requestForm->save();
+
+            // Audit log
+            AuditLog::create([
+                'model' => 'RequestForm',
+                'model_id' => $requestForm->id,
+                'action' => 'updated',
+                'old_values' => $oldValues,
+                'new_values' => $request->all(),
+                'user_id' => auth()->id(),
+            ]);
+
+            // Send notification via websocket
+            $this->sendNotification('Request Form Updated', 'Request form has been updated.');
 
             return response()->json($requestForm);
 
@@ -108,4 +125,18 @@ class RequestController extends Controller
         }
     }
 
+    private function sendNotification($title, $message)
+    {
+        // Send HTTP request to Django websocket server to broadcast notification
+        // Assuming Django is running on 202.137.117.84:8012
+        try {
+            Http::post('http://202.137.117.84:8012/api/send-notification/', [
+                'title' => $title,
+                'message' => $message,
+            ]);
+        } catch (\Exception $e) {
+            // Log error if notification fails
+            \Log::error('Failed to send notification: ' . $e->getMessage());
+        }
+    }
 }

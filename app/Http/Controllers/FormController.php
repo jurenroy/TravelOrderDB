@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Form;
 use App\Models\Employee;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Http;
 
 class FormController extends Controller
 {
@@ -491,6 +493,18 @@ class FormController extends Controller
         return $query->count();
     }
         
+        // // Get the filtered results with a limit, ordered descending by 'created_at'
+        // $forms = $query
+        //     // ->leftJoin('travel_clearances', 'forms.travel_order_id', '=', 'travel_clearances.travel_order_id')
+        //     // ->select('forms.*', 'travel_clearances.id as clearance_id', \DB::raw('travel_clearances.id IS NOT NULL as has_clearance'))
+        //     ->orderBy('forms.travel_order_id', 'desc')
+        //     ->offset($offset)
+        //     ->limit($limit)
+        //     ->get(); // Apply the limit here
+
+        // // Return the results as JSON
+        // return response()->json($forms);
+
         // Get the filtered results with a limit, ordered descending by 'created_at'
         $forms = $query->orderBy('travel_order_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here
 
@@ -586,6 +600,18 @@ class FormController extends Controller
         // Save the form to the database
         $form->save();
 
+        // Audit log
+        AuditLog::create([
+            'model' => 'form',
+            'model_id' => $form->travel_order_id,
+            'action' => 'created',
+            'new_values' => $validatedData,
+            'user_id' => auth()->id(),
+        ]);
+
+        // Send notification via websocket
+        $this->sendNotification('Travel Order Form Created', 'A new travel order form has been created for ' . $form->destination);
+
         // Redirect the user back to the form or any other page
         return redirect('/add_form')->with('success', 'Form submitted successfully!');
     }
@@ -593,10 +619,10 @@ class FormController extends Controller
     public function update_via_post(Request $request, $id)
     {
         $form = Form::findOrFail($id);
-    
+
         $originalData = $form->getOriginal();
         $updatedData = $request->all();
-    
+
         // Compare original data with updated data and only update the fields that have changed
         foreach ($updatedData as $key => $value) {
             if ($originalData[$key] != $value) {
@@ -616,7 +642,7 @@ class FormController extends Controller
 
             // Increment to_num by 301 based on the count
             $form->to_num = $newToNum;
-        
+
             // Save the form (if necessary)
             $form->save();
         }
@@ -635,11 +661,47 @@ class FormController extends Controller
             $form->to_num = $newToNum;
         }
 
-    
+
         // Save the updated form
         $form->save();
-    
+
+        // Audit log
+        AuditLog::create([
+            'model' => 'form',
+            'model_id' => $form->travel_order_id,
+            'action' => 'updated',
+            'old_values' => $originalData,
+            'new_values' => $updatedData,
+            'user_id' => auth()->id(),
+        ]);
+
+        // Send notification via websocket
+        $this->sendNotification('Travel Order Form Updated', 'Travel order form for ' . $form->destination . ' has been updated.');
+
         return response()->json(['message' => 'Resource updated successfully']);
+    }
+
+    public function getAuditLogs($id)
+    {
+        $auditLogs = AuditLog::where('model', 'forms')
+            ->where('model_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($auditLogs);
+    }
+
+    private function sendNotification($title, $message)
+    {
+        try {
+            Http::post('http://localhost:8000/send-notification', [
+                'title' => $title,
+                'message' => $message,
+            ]);
+        } catch (\Exception $e) {
+            // Log the error or handle it as needed
+            \Log::error('Failed to send notification: ' . $e->getMessage());
+        }
     }
 
 }

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class JobOrderRequest extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'reference_id',
         'job_order_no',

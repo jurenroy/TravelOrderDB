@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LeaveForm;
 use App\Models\Employee;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Http;
 
 
 class LeaveFormController extends Controller
@@ -45,9 +47,9 @@ class LeaveFormController extends Controller
         $chiefDivisionIds = array_column($employeesWithChiefArray, 'division_id'); // Get an array of division_id
 
         $index = array_search($name_id, $chiefNameIds);
-        $division = $chiefDivisionIds[$index];
+        $division = $index !== false ? $chiefDivisionIds[$index] : null;
 
-        $divisionMembers = Employee::where('division_id', $division)->get();
+        $divisionMembers = $division ? Employee::where('division_id', $division)->get() : collect();
         $divisionMembersArray = $divisionMembers->toArray();
         $divisionMembersIds = array_column($divisionMembersArray, 'name_id'); // Get an array of name_id
 
@@ -55,7 +57,6 @@ class LeaveFormController extends Controller
         $ORDMembersArray = $ORDMembers->toArray();
         $ORDMembersIds = array_column($ORDMembersArray, 'name_id'); // Get an array of name_id
 
-    
         if (in_array($name_id, [24])) {
             if ($status === 'Me') {
                 $query->where('name_id', $name_id);
@@ -222,6 +223,21 @@ class LeaveFormController extends Controller
         // Create a new leave form record with the validated data
         $leaveForm = LeaveForm::create($validatedData);
 
+        // Audit log
+        AuditLog::create([
+            'model' => 'leaveform',
+            'model_id' => $leaveForm->leaveform_id,
+            'action' => 'created',
+            'new_values' => $validatedData,
+            'user_id' => auth()->id(),
+        ]);
+
+        // Send notification via websocket
+        $this->sendNotification('Leave Form Created', 'A new leave form has been created for ' . $leaveForm->type);
+
+        // Send admin notification to name_id 76
+        $this->sendNotification('Leave Form Created', 'A new leave form has been created for ' . $leaveForm->type, true);
+
         return response()->json($leaveForm, 201);
     }
 
@@ -270,10 +286,125 @@ class LeaveFormController extends Controller
         unset($validatedData['dates']);
     }
 
+    $oldValues = $leaveForm->toArray();
+
     // Update the fields
     $leaveForm->update($validatedData);
 
+    // Audit log
+    AuditLog::create([
+        'model' => 'leaveform',
+        'model_id' => $leaveForm->leaveform_id,
+        'action' => 'updated',
+        'old_values' => $oldValues,
+        'new_values' => $validatedData,
+        'user_id' => auth()->id(),
+    ]);
+
+    // Check for status changes and send targeted notifications
+    $this->sendStatusNotifications($leaveForm, $oldValues, $validatedData);
+
+    // Send notification via websocket
+    $this->sendNotification('Leave Form Updated', 'Leave form for ' . $leaveForm->type . ' has been updated.');
+
+    // Send admin notification to name_id 76
+    $this->sendNotification('Leave Form Updated', 'Leave form for ' . $leaveForm->type . ' has been updated.', true);
+
     // Return the updated leave form
     return response()->json($leaveForm, 200);
+    }
+
+    public function sendNotification($title, $message, $isAdmin = false, $target_name_id = null)
+    {
+        // Send HTTP request to Django websocket server to broadcast notification
+        // Assuming Django is running on 172.31.10.34:8012
+        $url = $isAdmin ? 'http://172.31.10.34:8012/api/send-notification-admin/' : 'http://172.31.10.34:8012/api/send-notification/';
+        $data = [
+            'title' => $title,
+            'message' => $message,
+        ];
+        if ($target_name_id) {
+            $data['target_name_id'] = $target_name_id;
+        }
+        try {
+            Http::post($url, $data);
+            return true; // Return true on success
+        } catch (\Exception $e) {
+            // Log error if notification fails
+            \Log::error('Failed to send notification: ' . $e->getMessage());
+            return false; // Return false on failure
+        }
+    }
+
+    private function sendStatusNotifications($leaveForm, $oldValues, $newValues)
+    {
+        $creatorNameId = $leaveForm->name_id;
+
+        // Check if leave credits were filled (any of the credit fields changed from null to not null)
+        $creditFields = ['asof', 'tevl', 'tesl', 'ltavl', 'ltasl', 'bvl', 'vsl', 'dayswpay', 'dayswopay', 'others'];
+        $creditsFilled = false;
+        foreach ($creditFields as $field) {
+            if (is_null($oldValues[$field]) && !is_null($newValues[$field] ?? null)) {
+                $creditsFilled = true;
+                break;
+            }
+        }
+        if ($creditsFilled) {
+            // Notify creator that leave credits have been filled
+            $this->sendNotification('Leave Credits Filled', 'Your leave form for ' . $leaveForm->type . ' has been filled with leave credits.', false, $creatorNameId);
+            // Notify name_id 2 for certification
+            $this->sendNotification('Leave Form Ready for Certification', 'A leave form for ' . $leaveForm->type . ' is ready for certification.', false, 2);
+        }
+
+        // Check if certification was added
+        if (is_null($oldValues['certification']) && !is_null($newValues['certification'] ?? null)) {
+            // Notify creator that certification has been done
+            $this->sendNotification('Leave Form Certified', 'Your leave form for ' . $leaveForm->type . ' has been certified.', false, $creatorNameId);
+            // Determine next approvers
+            $employee = Employee::where('name_id', $creatorNameId)->first();
+            if ($employee && $employee->division_id == 5) {
+                // Notify employees with rd
+                $rds = Employee::whereNotNull('rd')->get();
+                foreach ($rds as $rd) {
+                    $this->sendNotification('Leave Form Ready for Recommendation', 'A leave form for ' . $leaveForm->type . ' is ready for recommendation.', false, $rd->name_id);
+                }
+            } else {
+                // Notify chiefs
+                $chiefs = Employee::where('chief', '1')->get();
+                foreach ($chiefs as $chief) {
+                    $this->sendNotification('Leave Form Ready for Recommendation', 'A leave form for ' . $leaveForm->type . ' is ready for recommendation.', false, $chief->name_id);
+                }
+            }
+        }
+
+        // Check if recommendation was added
+        if (is_null($oldValues['recommendation']) && !is_null($newValues['recommendation'] ?? null)) {
+            // Notify creator that recommendation has been done
+            $this->sendNotification('Leave Form Recommended', 'Your leave form for ' . $leaveForm->type . ' has been recommended.', false, $creatorNameId);
+            // Notify approvers (same logic as above)
+            $employee = Employee::where('name_id', $creatorNameId)->first();
+            if ($employee && $employee->division_id == 5) {
+                $rds = Employee::whereNotNull('rd')->get();
+                foreach ($rds as $rd) {
+                    $this->sendNotification('Leave Form Ready for Approval', 'A leave form for ' . $leaveForm->type . ' is ready for approval.', false, $rd->name_id);
+                }
+            } else {
+                $chiefs = Employee::where('chief', '1')->get();
+                foreach ($chiefs as $chief) {
+                    $this->sendNotification('Leave Form Ready for Approval', 'A leave form for ' . $leaveForm->type . ' is ready for approval.', false, $chief->name_id);
+                }
+            }
+        }
+
+        // Check if approval was added
+        if (is_null($oldValues['appsig']) && !is_null($newValues['appsig'] ?? null)) {
+            if (!is_null($newValues['disapproved'] ?? null)) {
+                // Notify creator of disapproval
+                $this->sendNotification('Leave Form Disapproved', 'Your leave form for ' . $leaveForm->type . ' has been disapproved.', false, $creatorNameId);
+            } else {
+                // Notify creator of approval
+                $this->sendNotification('Leave Form Approved', 'Your leave form for ' . $leaveForm->type . ' has been approved.', false, $creatorNameId);
+            }
+        }
     }
 }

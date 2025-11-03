@@ -28,6 +28,10 @@ use App\Http\Controllers\FeedbackController;
 
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FadrfController;
+use App\Http\Controllers\TravelClearanceController;
+use App\Http\Controllers\AuditLogController;
+
+use App\Http\Controllers\RsoController;
 
 use App\Http\Controllers\CalendarController;
 
@@ -166,6 +170,41 @@ Route::get('message/{user1_id}/', [MessageController::class, 'indexer']); // Rea
 Route::get('readmessage/{sender_id}/{receiver_id}/', [MessageController::class, 'markAsRead']); // Read all
 
 Route::get('api/calendar/events', [CalendarController::class, 'index']);
+
+// Travel Clearance Routes
+Route::post('travel_clearances', [TravelClearanceController::class, 'store']); // Create
+Route::get('travel_clearances', [TravelClearanceController::class, 'index']); // Read all
+Route::get('travel_clearances/{id}', [TravelClearanceController::class, 'show']); // Read one
+Route::post('travel_clearances/update/{id}', [TravelClearanceController::class, 'update']); // Update
+Route::put('travel_clearances/{id}/approve', [TravelClearanceController::class, 'approve']); // Approve
+Route::delete('travel_clearances/{id}', [TravelClearanceController::class, 'destroy']); // Delete
+Route::get('travel_clearances/generate/clearance_number', [TravelClearanceController::class, 'generateClearanceNumber']); // Generate clearance number
+Route::get('travel_clearances/suggestions/{travel_order_id}', [TravelClearanceController::class, 'getSuggestions']); // Get similar travel orders for suggestions
+Route::get('audit_logs/travel_clearances/{id}', [TravelClearanceController::class, 'getAuditLogs']); // Get audit logs for a specific travel clearance
+
+// Audit Logs Routes
+Route::get('audit_logs', [AuditLogController::class, 'index']); // Get all audit logs
+Route::get('audit_logs/{model}', [AuditLogController::class, 'getByModel']); // Get audit logs by model
+Route::get('audit_logs/forms/{id}', [FormController::class, 'getAuditLogs']); // Get audit logs for a specific form
+
+Route::post('rso', [RsoController::class, 'store']);             // Create
+Route::get('rso', [RsoController::class, 'index']);             // Read all
+Route::get('rso/{rso_number}', [RsoController::class, 'show']); // Read one
+Route::post('rso/update/{rso_number}', [RsoController::class, 'update']); // Update
+Route::delete('rso/{rso_number}', [RsoController::class, 'destroy']);     // Delete
+
+Route::get('/storage/RSO/{filename}', function ($filename) {
+    $path = storage_path('app/public/RSO/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    return Response::make($file, 200)->header("Content-Type", $type);
+});
 
 // Specific route for files in the 'ictrequest' folder
 Route::get('/storage/ictrequest/{filename}', function ($filename) {

@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Form extends Model
 {
-
     use HasFactory;
 
     protected $primaryKey = 'travel_order_id';
-    
+
     protected $fillable = [
         'name_id',
         'position_id',
@@ -33,7 +32,8 @@ class Form extends Model
         'to_num',
         'initial',
         'intervals',
-        'aor'
+        'aor',
+        'hasclearance'
 
         // 'date' is not included as it's set to auto-populate
     ];

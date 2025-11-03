@@ -112,15 +112,22 @@ class CalendarController extends Controller
             if (preg_match('/([A-Za-z]+)\s+(\d+)(?:-(\d+))?,\s*(\d{4})/', $item->dates, $matches)) {
                 $month = $matches[1];
                 $startDay = $matches[2];
-                $endDay = $matches[3] ?? $startDay;
+                $endDay = $matches[3] ?? null;
                 $year = $matches[4];
+            
                 $parsedStart = date('Y-m-d', strtotime("$month $startDay, $year"));
-                $parsedEnd = date('Y-m-d', strtotime("$month $endDay, $year"));
+            
+                // If there's no end day (single date) or item->days is 1, use the same date for end
+                if (!$endDay || (isset($item->days) && trim($item->days) == '1 Day')) {
+                    $parsedEnd = $parsedStart;
+                } else {
+                    $parsedEnd = date('Y-m-d', strtotime("$month $endDay, $year"));
+                }
             }
-
+            
             // Skip invalid dates (either start or end date is null)
             if (!$parsedStart || !$parsedEnd) {
-                return null;  // This will exclude the leave form from the final list
+                return null;
             }
 
             // Fetch the Employee to get the division_id based on name_id

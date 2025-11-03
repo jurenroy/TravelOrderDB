@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class FadrfForm extends Model
 {
     use HasFactory;
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

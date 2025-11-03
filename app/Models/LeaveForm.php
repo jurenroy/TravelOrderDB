@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveForm extends Model
 {
-
     use HasFactory;
 
     protected $primaryKey = 'leaveform_id';
-    
+
     protected $fillable = [
         "name_id",
         "position_id",

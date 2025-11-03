@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Service;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Http;
 
 class ServiceController extends Controller
 {
@@ -147,25 +149,25 @@ public function getCount($name_id)
             $fileNames[] = $fileName;
         }
     }
-    // return $fileNames;
-
-    // // Convert the array of file names into a string in the desired format
-    // $fileNamesString = '[' . implode(', ', array_map(function($fileName) {
-    //     return "\"$fileName\""; // Add double quotes around each file name
-    // }, $fileNames)) . ']';
-    
 
     // Create the service with blank serviceRequestNo and the uploaded files
     $service = Service::create(array_merge($request->all(), [
         'serviceRequestNo' => 'TBA', // Default value for service request number
         'files' => !empty($fileNames) ? $fileNames : null, // Store the formatted string
     ]));
-    // // Return the service with the file field
-    // return response()->json([
-    //     'service' => $service,
-    //     'files' => json_decode($service->file) // Decode JSON if it's stored as JSON
-    // ]);
-    
+
+    // Audit log
+    AuditLog::create([
+        'model' => 'Service',
+        'model_id' => $service->id,
+        'action' => 'created',
+        'new_values' => $request->all(),
+        'user_id' => auth()->id(),
+    ]);
+
+    // Send notification via websocket
+    $this->sendNotification('ICT Service Request Created', 'A new ICT service request has been created for ' . $service->typeOfService);
+
     return response()->json($service, 201);
 }
 
@@ -186,6 +188,8 @@ public function getCount($name_id)
     if (!$service) {
         return response()->json(['message' => 'Service not found'], 404);
     }
+
+    $oldValues = $service->toArray();
 
     $request->validate([
         'date' => 'sometimes|nullable|date',
@@ -240,6 +244,19 @@ public function getCount($name_id)
     // Update the service with the new values
     $service->update($request->all());
 
+    // Audit log
+    AuditLog::create([
+        'model' => 'Service',
+        'model_id' => $service->id,
+        'action' => 'updated',
+        'old_values' => $oldValues,
+        'new_values' => $request->all(),
+        'user_id' => auth()->id(),
+    ]);
+
+    // Send notification via websocket
+    $this->sendNotification('ICT Service Request Updated', 'ICT service request for ' . $service->typeOfService . ' has been updated.');
+
     return response()->json($service);
 }
 
@@ -251,7 +268,39 @@ public function getCount($name_id)
         if (!$service) {
             return response()->json(['message' => 'Service not found'], 404);
         }
+
+        $oldValues = $service->toArray();
+
         $service->delete();
+
+        // Audit log
+        AuditLog::create([
+            'model' => 'Service',
+            'model_id' => $id,
+            'action' => 'deleted',
+            'old_values' => $oldValues,
+            'new_values' => null,
+            'user_id' => auth()->id(),
+        ]);
+
+        // Send notification via websocket
+        $this->sendNotification('ICT Service Request Deleted', 'ICT service request for ' . $oldValues['typeOfService'] . ' has been deleted.');
+
         return response()->json(['message' => 'Service deleted successfully']);
+    }
+
+    private function sendNotification($title, $message)
+    {
+        // Send HTTP request to Django websocket server to broadcast notification
+        // Assuming Django is running on 202.137.117.84:8012
+        try {
+            Http::post('http://202.137.117.84:8012/api/send-notification/', [
+                'title' => $title,
+                'message' => $message,
+            ]);
+        } catch (\Exception $e) {
+            // Log error if notification fails
+            \Log::error('Failed to send notification: ' . $e->getMessage());
+        }
     }
 }
