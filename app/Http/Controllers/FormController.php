@@ -534,6 +534,7 @@ class FormController extends Controller
             'signature1' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Signature 1 is optional
             'signature2' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Signature 2 is optional
             'pdea' => 'nullable|string',
+            'papc' => 'nullable|string',
             'ala' => 'nullable|string',
             'appropriations' => 'nullable|string',
             'remarks' => 'nullable|string',

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Rso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use thiagoalessio\TesseractOCR\TesseractOCR;
+use Smalot\PdfParser\Parser;
 
 class RsoController extends Controller
 {
@@ -40,9 +42,38 @@ class RsoController extends Controller
     return response()->json($results);
 }
 
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Rso::with('signatory')->get());
+        $query = Rso::with('signatory');
+
+        // Get authenticated user
+        $userId = auth()->check() ? auth()->user()->id : null;
+
+        // Restriction: users with id 76 or 24 can see all RSOs, others only their own
+        if ($userId && !in_array($userId, [76, 24])) {
+            $query->where('rso_name', 'like', '%' . $userId . '%');
+        }
+
+        // Filters based on user type
+        if (in_array($userId, [76, 24])) {
+            // For users 76/24: only search filter (name or RSO number)
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('rso_number', 'like', '%' . $search . '%')
+                      ->orWhere('rso_name', 'like', '%' . $search . '%');
+                });
+            }
+        } else {
+            // For other users: only date filter
+            if ($request->has('scheduled_date') && !empty($request->scheduled_date)) {
+                $date = $request->scheduled_date;
+                $query->where('rso_scheduled_dates_from', '<=', $date)
+                      ->where('rso_scheduled_dates_to', '>=', $date);
+            }
+        }
+
+        return response()->json($query->get());
     }
 
     /**
@@ -118,6 +149,14 @@ class RsoController extends Controller
     }
 
     /**
+     * Get current authenticated user.
+     */
+    public function user()
+    {
+        return response()->json(auth()->user());
+    }
+
+    /**
      * Remove the specified RSO record from storage.
      */
     public function destroy($rso_number)
@@ -132,5 +171,6 @@ class RsoController extends Controller
 
         return response()->json(['message' => 'RSO deleted successfully']);
     }
+
 }
 

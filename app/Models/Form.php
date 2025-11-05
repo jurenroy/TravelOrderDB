@@ -23,6 +23,7 @@ class Form extends Model
         'signature1',
         'signature2',
         'pdea',
+        'papc',
         'ala',
         'appropriations',
         'remarks',

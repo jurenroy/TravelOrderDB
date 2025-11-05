@@ -17,3 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// RSO OCR Route
+Route::post('/rso/ocr', [App\Http\Controllers\RsoController::class, 'extractSubject']);
+
+// RSO API Resource
+Route::apiResource('rso', App\Http\Controllers\RsoController::class);
+
+// User Route
+Route::get('user', [App\Http\Controllers\RsoController::class, 'user']);

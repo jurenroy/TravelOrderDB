@@ -194,7 +194,7 @@ Route::post('rso/update/{rso_number}', [RsoController::class, 'update']); // Upd
 Route::delete('rso/{rso_number}', [RsoController::class, 'destroy']);     // Delete
 
 Route::get('/storage/RSO/{filename}', function ($filename) {
-    $path = storage_path('app/public/RSO/' . $filename);
+    $path = storage_path('app/public/public/RSO/' . $filename);
 
     if (!File::exists($path)) {
         abort(404);
