@@ -545,6 +545,7 @@ class FormController extends Controller
             'initial' => 'nullable|string',
             'intervals' => 'nullable|string',
             'aor' => 'nullable|string',
+            'link' => 'nullable|string',
         ]);
 
         // Handle file uploads

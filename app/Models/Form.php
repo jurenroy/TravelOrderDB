@@ -34,7 +34,8 @@ class Form extends Model
         'initial',
         'intervals',
         'aor',
-        'hasclearance'
+        'hasclearance',
+        'link'
 
         // 'date' is not included as it's set to auto-populate
     ];
