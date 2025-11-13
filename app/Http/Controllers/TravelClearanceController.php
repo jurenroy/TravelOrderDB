@@ -14,9 +14,12 @@ class TravelClearanceController extends Controller
     public function index(Request $request)
     {
         $limit = min($request->input('limit', 10), 10000);
+        $offset = $request->input('offset', 0); // Default to 0 if no offset is provided
+    
         return response()->json(TravelClearance::orderBy('created_at', 'desc')
-        ->limit($limit)
-        ->get());
+            ->skip($offset)  // Skip the records based on the offset
+            ->take($limit)   // Limit the number of records
+            ->get());
     }
 
     public function store(Request $request)
