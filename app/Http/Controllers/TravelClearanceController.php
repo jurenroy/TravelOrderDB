@@ -77,6 +77,7 @@ class TravelClearanceController extends Controller
             if ($travelOrder) {
                 $travelOrder->update(['hasclearance' => $validatedData['clearance_number'],
                 'note' => 'KAYSHE JOY F. PELINGON:' . $readableBasis, // 🟢 store the readable text
+                'papc' => $validatedData['pap_code']
             ]);
             }
         }

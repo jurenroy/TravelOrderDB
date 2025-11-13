@@ -42,39 +42,84 @@ class RsoController extends Controller
     return response()->json($results);
 }
 
-    public function index(Request $request)
-    {
-        $query = Rso::with('signatory');
+public function index(Request $request)
+{
+    // Initialize the query for RSOs
+    $query = Rso::with('signatory');
 
-        // Get authenticated user
-        $userId = auth()->check() ? auth()->user()->id : null;
+    // Get the 'name' parameter from the request
+    $name = $request->name;
 
-        // Restriction: users with id 76 or 24 can see all RSOs, others only their own
-        if ($userId && !in_array($userId, [76, 24])) {
-            $query->where('rso_name', 'like', '%' . $userId . '%');
-        }
+    // Convert the 'name' parameter to an array (explode by comma if it's a comma-separated string)
+    $nameArray = explode(',', $name); // Example: '6' => ['6'], '6,12' => ['6', '12']
 
-        // Filters based on user type
-        if (in_array($userId, [76, 24])) {
-            // For users 76/24: only search filter (name or RSO number)
-            if ($request->has('search') && !empty($request->search)) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('rso_number', 'like', '%' . $search . '%')
-                      ->orWhere('rso_name', 'like', '%' . $search . '%');
-                });
-            }
-        } else {
-            // For other users: only date filter
-            if ($request->has('scheduled_date') && !empty($request->scheduled_date)) {
-                $date = $request->scheduled_date;
-                $query->where('rso_scheduled_dates_from', '<=', $date)
-                      ->where('rso_scheduled_dates_to', '>=', $date);
-            }
-        }
-
-        return response()->json($query->get());
+    // If the name is "76" or "24", show all RSOs (admins)
+    if (in_array($name, ['76', '24'])) {
+        // Admins (76, 24) can see all RSOs
+        // No additional filtering needed here
+    } else {
+        // Normal users: Filter RSOs based on the `rso_name` field
+        $query->where(function ($q) use ($nameArray) {
+            $q->where('rso_name', 'like', '%all%')  // Allow access to "all"
+              ->orWhere(function($q2) use ($nameArray) {
+                  // Check if any of the name_ids from $nameArray are contained in rso_name
+                  foreach ($nameArray as $nameId) {
+                      $q2->orWhereRaw("FIND_IN_SET(?, rso_name)", [$nameId]);
+                  }
+              });
+        });
     }
+
+    // Now, apply search if provided
+    if ($request->has('search') && !empty($request->search)) {
+        $searchTerm = $request->search;
+
+        // Check if searchTerm is numeric (rso_number search) or a string (name search)
+        if (is_numeric($searchTerm)) {
+            // If it's numeric, search by rso_number
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereRaw("REPLACE(rso_number, 'No. ', '') LIKE ?", ['%' . $searchTerm . '%']);
+            });
+        } else if (strpos($searchTerm, '-') !== false) {
+            // If the search term contains a dash, assume it's part of the rso_number
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereRaw("REPLACE(rso_number, 'No. ', '') LIKE ?", ['%' . $searchTerm . '%']);
+            });
+        }else {
+            // If it's a string, search by the Names model
+            $names = \App\Models\Name::where(function ($query) use ($searchTerm) {
+                $query->where('first_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('middle_init', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
+            })->get();
+
+            // Get all matching name_ids from the Names model
+            $nameIds = $names->pluck('name_id')->toArray();
+
+            // If we found matching name_ids, filter RSOs accordingly
+            if (count($nameIds) > 0) {
+                $query->where(function ($q) use ($nameIds) {
+                    // Check if rso_name is "all" or matches any name_id from the array
+                    $q->where('rso_name', 'like', '%all%')  // Allow access to "all"
+                      ->orWhere(function($q2) use ($nameIds) {
+                          // Treat rso_name as an array for comparison
+                          foreach ($nameIds as $nameId) {
+                              $q2->orWhereRaw("FIND_IN_SET(?, rso_name)", [$nameId]);
+                          }
+                      });
+                });
+            } else {
+                // If no names match, return empty or handle as needed
+                return response()->json([]);
+            }
+        }
+    }
+
+    // Return the filtered result as a JSON response
+    return response()->json($query->get());
+}
+
+
 
     /**
      * Store a newly created RSO record in storage.
