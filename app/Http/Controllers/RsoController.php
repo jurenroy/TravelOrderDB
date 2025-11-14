@@ -88,9 +88,9 @@ public function index(Request $request)
         }else {
             // If it's a string, search by the Names model
             $names = \App\Models\Name::where(function ($query) use ($searchTerm) {
-                $query->where('first_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('middle_init', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
+                $query->whereRaw('LOWER(first_name) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
+                      ->orWhereRaw('LOWER(middle_init) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
+                      ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . strtolower($searchTerm) . '%']);
             })->get();
 
             // Get all matching name_ids from the Names model

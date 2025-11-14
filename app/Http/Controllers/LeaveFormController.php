@@ -26,7 +26,7 @@ class LeaveFormController extends Controller
 
 
     // Retrieve a specific service
-    public function show($name_id, $status, $limit, $offset, $countOnly = false)
+    public function show(Request $request, $name_id, $status, $limit, $offset, $countOnly = false)
     {
         $query = LeaveForm::query();
         // Retrieve employees where rd is not null
@@ -177,6 +177,37 @@ class LeaveFormController extends Controller
         // If we only need the count, return it directly
     if ($countOnly) {
         return $query->count();
+    }
+    // Now, apply search if provided
+    if ($request->has('search') && !empty($request->search)) {
+        $searchTerm = $request->search;
+        // If it's a string, search by the Names model
+        $names = \App\Models\Name::where(function ($query) use ($searchTerm) {
+            $query->whereRaw('LOWER(first_name) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
+                  ->orWhereRaw('LOWER(middle_init) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
+                  ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . strtolower($searchTerm) . '%']);
+        })->get();
+
+        // Get all matching name_ids from the Names model
+        $nameIds = $names->pluck('name_id')->toArray();
+
+        // If we found matching name_ids, filter RSOs accordingly
+        if (count($nameIds) > 0) {
+            // Apply the filter to the query using whereIn
+            $forms = $query->whereIn('name_id', $nameIds)  // Use whereIn for the filtering
+                           ->orderBy('leaveform_id', 'desc')
+                           ->get();
+        
+            // Apply offset and limit to the result collection (in-memory pagination)
+            $paginatedForms = $forms->slice($offset, $limit)->values();
+                        
+            // Return the paginated results as JSON
+            return response()->json($paginatedForms);
+        }
+         else {
+            // If no names match, return empty or handle as needed
+            return response()->json([]);
+        }
     }
         return $query->orderBy('leaveform_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here
     }
