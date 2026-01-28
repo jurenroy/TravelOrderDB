@@ -36,18 +36,18 @@ class FormController extends Controller
         $query = Form::query();
 
         // Define section chief IDs and members
-        $sectionChiefIds = [39, 2,43, 8, 42, 34, 29, 36, 11, 5, 47];
+        $sectionChiefIds = [23, 2, 43, 8, 42, 34, 29, 36, 48, 16, 47];
         $members = [
-            [23, 25, 35, 70, 64,67,78], //Perater 39
+            [25, 35, 70, 64,67,78,91], //Perater 39 new dulce 23
             [30, 7, 26, 18, 49, 24, 84, 85,68,69], //Alvarez 2 
             [40,71,81], //Silverio 43
             [32, 50, 71], //Bondad 8 
             [33, 6], //Serojales 42
-            [41, 46,89], //Orteza 34
-            [38, 65, 1, 28], //Ligas 29
+            [41, 46,89, 58], //Orteza 34
+            [38, 65, 1, 28, 59], //Ligas 29
             [44, 22, 61, 27], //Paulma 36
-            [31], //Cajegas 11
-            [16, 63, 19, 9], //Baraacal 5
+            [31, 11], //Cajegas 11 amv 48
+            [63, 19, 9], //Baraacal 5 dispo 16
             [12, 14] //Verdejo 47
         ];
         // Retrieve employees where rd is not null
@@ -251,22 +251,21 @@ class FormController extends Controller
                                       });
       
                           }
-                }else {
+                } else {
                     $query->where('division_id', $division)
                           ->whereNotNull('note')
                           ->whereNull('signature1')
                           ->where('intervals', 0)
                           ->where('name_id', '!=', $name_id)
                           ->where('name_id', '!=', 45)
+                          ->where('to_num', 0)
                           ->orWhere(function($query) use ($division, $name_id){
                                 $query->where('division_id', $division)
                                   ->where('name_id', '!=', $name_id)
                                   ->where('name_id', '!=', 45)
                                   ->whereNull('initial') // Check if signature2 is NULL
-                                  ->where('intervals', 1)
-                                   
-                                  ; 
-                          });
+                                  ->where('intervals', 1);
+                                });
 
                     if ($name_id == $OICNameId[0]) {
                       // If division is 5, check for signature2 being null
@@ -546,10 +545,10 @@ class FormController extends Controller
 
     }
 
-    public function getCount($name_id)
+    public function getCount(Request $request, $name_id)
 {
     // Call the getForm method with 'Pending' status and only ask for the count
-    return $this->getForm($name_id, 'Pending', 0, 0, true);
+    return $this->getForm($request, $name_id, 'Pending', 0, 0, true);
 }
 
     public function submitForm(Request $request)
@@ -594,13 +593,13 @@ class FormController extends Controller
 
         // Valid name_id values
         $validNameIds = [
-            13,10,37,62,53,4,56,58,55,60,59,20,77
+            13,10,37,62,53,4,56,55,60,20,77,92,93,94
         ];
         $validSCNameIds = [
-            39,2,3,8,42,34,29,36,11,5,47, 52,51,66,17,72,73,54,80, 43,40,71,82,81,83,87,88,79
+            39,2,3,8,42,34,29,36,48,47, 52,51,66,17,72,73,54,80, 43,40,71,82,81,83,87,88,79,23,16
         ];
         $validDCNameIds = [
-            48,15,45,21
+            5,15,45,21
         ];
     
         // Set initial to 'initialized' if name_id is in the valid list
@@ -635,17 +634,17 @@ class FormController extends Controller
         // Save the form to the database
         $form->save();
 
-        // Audit log
-        AuditLog::create([
-            'model' => 'form',
-            'model_id' => $form->travel_order_id,
-            'action' => 'created',
-            'new_values' => $validatedData,
-            'user_id' => auth()->id(),
-        ]);
+        // // Audit log
+        // AuditLog::create([
+        //     'model' => 'form',
+        //     'model_id' => $form->travel_order_id,
+        //     'action' => 'created',
+        //     'new_values' => $validatedData,
+        //     'user_id' => auth()->id(),
+        // ]);
 
-        // Send notification via websocket
-        $this->sendNotification('Travel Order Form Created', 'A new travel order form has been created for ' . $form->destination);
+        // // Send notification via websocket
+        // $this->sendNotification('Travel Order Form Created', 'A new travel order form has been created for ' . $form->destination);
 
         // Redirect the user back to the form or any other page
         return redirect('/add_form')->with('success', 'Form submitted successfully!');
@@ -682,7 +681,7 @@ class FormController extends Controller
             $form->save();
         }
 
-        if ($request->filled('initial') && $form->aor == 1 && $form->intervals == 1 && in_array($form->name_id, [15, 21, 45, 48])) {
+        if ($request->filled('initial') && $form->aor == 1 && $form->intervals == 1 && in_array($form->name_id, [15, 21, 45, 5])) {
              // Get the current year
             $currentYear = date('Y');
 
@@ -700,18 +699,18 @@ class FormController extends Controller
         // Save the updated form
         $form->save();
 
-        // Audit log
-        AuditLog::create([
-            'model' => 'form',
-            'model_id' => $form->travel_order_id,
-            'action' => 'updated',
-            'old_values' => $originalData,
-            'new_values' => $updatedData,
-            'user_id' => auth()->id(),
-        ]);
+        // // Audit log
+        // AuditLog::create([
+        //     'model' => 'form',
+        //     'model_id' => $form->travel_order_id,
+        //     'action' => 'updated',
+        //     'old_values' => $originalData,
+        //     'new_values' => $updatedData,
+        //     'user_id' => auth()->id(),
+        // ]);
 
-        // Send notification via websocket
-        $this->sendNotification('Travel Order Form Updated', 'Travel order form for ' . $form->destination . ' has been updated.');
+        // // Send notification via websocket
+        // $this->sendNotification('Travel Order Form Updated', 'Travel order form for ' . $form->destination . ' has been updated.');
 
         return response()->json(['message' => 'Resource updated successfully']);
     }
