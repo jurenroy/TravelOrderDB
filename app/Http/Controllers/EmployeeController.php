@@ -141,6 +141,9 @@ public function edit_employee(Request $request)
         'chief' => 'integer',
         'rd' => 'string',
         'isActive' => 'string',
+        'bio_id' => 'string',
+        'sched_id' => 'string',
+        'salary_id' => 'string',
     ]);
 
     // Find the employee by ID or throw an error if not found
@@ -151,6 +154,9 @@ public function edit_employee(Request $request)
         'chief' => $request->input('chief', $employee->chief),
         'rd' => $request->input('rd', $employee->rd),
         'isActive' => $request->input('isActive', $employee->isActive),
+        'bio_id' => $request->input('bio_id', $employee->bio_id), // <-- add this
+        'sched_id' => $request->input('sched_id', $employee->sched_id), // <-- add this
+        'salary_id' => $request->input('salary_id', $employee->salary_id), // <-- add this
     ]);
 
     // Update or create related models if necessary

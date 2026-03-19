@@ -35,6 +35,12 @@ use App\Http\Controllers\RsoController;
 
 use App\Http\Controllers\CalendarController;
 
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DtrController;
+use App\Http\Controllers\DtrDaysController;
+
+use App\Http\Controllers\PayslipCOSController;
+use App\Http\Controllers\PayslipRegularController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,10 +61,11 @@ Route::get('/status', function () {
     return view('status');
 });
 
-Route::get('/get_employees_json', function () {
-    $employee = Employee::all();
-    return response()->json($employee);
-});
+// Route::get('/get_employees_json', function () {
+//     $employee = Employee::all();
+//     return response()->json($employee);
+// });
+Route::get('/get_employees_json', [EmployeeController::class, 'index']);
 Route::get('/get_employees_json/{name_id}', [EmployeeController::class, 'show']);
 
 Route::get('/get_namez_json', function () {
@@ -119,6 +126,7 @@ Route::get('get_accounts_json/{name_id}', [AccountController::class, 'show']);
 Route::get('/add_form', [FormController::class, 'showForm']);
 
 Route::post('/add_form', [FormController::class, 'submitForm'])->name('submit.form');
+Route::delete('/delete_form/{id}', [FormController::class, 'destroyByTravelOrderId']);
 
 Route::post('update_form/{id}', [FormController::class, 'update_via_post']);
 
@@ -192,6 +200,55 @@ Route::get('rso', [RsoController::class, 'index']);             // Read all
 Route::get('rso/{rso_number}', [RsoController::class, 'show']); // Read one
 Route::post('rso/update/{rso_number}', [RsoController::class, 'update']); // Update
 Route::delete('rso/{rso_number}', [RsoController::class, 'destroy']);     // Delete
+
+Route::post('generate-dtr-cos', [DtrController::class, 'generateDTRCOS']);  
+Route::post('generate-dtr-regular', [DtrController::class, 'generateDTRREG']);  
+Route::post('generate-dtr-others', [DtrController::class, 'generateDTROTH']);  
+
+Route::post('dtr', [AttendanceController::class, 'store']);             // Create
+Route::get('dtr', [AttendanceController::class, 'index']);             // Read all
+Route::get('dtr/{id}', [AttendanceController::class, 'show']); // Read one
+Route::get('dtr/{name_id}/{date}', [AttendanceController::class, 'showAttendanceByDate']); // Read one
+Route::post('dtr/update/{rso_number}', [AttendanceController::class, 'update']); // Update
+Route::delete('dtr/{rso_number}', [AttendanceController::class, 'destroy']);     // Delete
+Route::get('/attendance/filter', [AttendanceController::class, 'filterAttendance']);
+Route::get('/attendance', [AttendanceController::class, 'mergedAttendance']);
+
+Route::get('dtrdays/{id}', [DtrDaysController::class, 'showByDtrId']);  
+Route::get('dtrremarks/{id}', [DtrDaysController::class, 'showRemarksByDtrId']); 
+
+Route::post('dtrlog', [DtrController::class, 'store']);             // Create
+Route::get('dtrlog', [DtrController::class, 'index']);             // Read all
+// Route::get('dtrlog/{id}', [DtrController::class, 'show']); // Read one
+Route::get('dtrlog/filter', [DtrController::class, 'showDtrByDate']); // filter sa table same params name_id, start_date, end_date
+Route::post('dtrlog/update/{id}', [DtrController::class, 'update']); // Update
+Route::delete('dtrlog/{id}', [DtrController::class, 'destroy']);     // Delete
+
+Route::get('parsedate/{leaveDates}', [DtrDaysController::class, 'parseLeaveDates']);
+
+Route::get('/payslip-cos', [PayslipCOSController::class, 'index']);
+Route::post('/payslip-cos', [PayslipCOSController::class, 'store']);
+Route::get('/payslip-cos/{id}', [PayslipCOSController::class, 'show']);
+// Route::put('/payslip-cos/{id}', [PayslipCOSController::class, 'update']);
+Route::post('/payslip-cos/update', [PayslipCOSController::class, 'save']);
+Route::delete('/payslip-cos/{id}', [PayslipCOSController::class, 'destroy']);
+Route::get('/payslip-cos/period/{period}', [PayslipCOSController::class, 'getByPeriod']);
+Route::get('/payslip-cos/dtrs/{dtrs_id}', [PayslipCOSController::class, 'getByDtrs']);
+Route::get('/payslip-cos/name/{name_id}', [PayslipCOSController::class, 'getByName']);
+Route::post('/cos-generate-payslips/{dtrs}', [PayslipCOSController::class, 'generatePayslipForDtrs']);
+Route::post('/cos-generate-batch-payslips', [PayslipCOSController::class, 'generateBatchPayslips']);
+
+
+Route::get('/payslip-regular', [PayslipRegularController::class, 'index']);
+Route::post('/payslip-regular', [PayslipRegularController::class, 'store']);
+Route::get('/payslip-regular/{id}', [PayslipRegularController::class, 'show']);
+Route::post('/payslip-regular/update', [PayslipRegularController::class, 'save']);
+Route::delete('/payslip-regular/{id}', [PayslipRegularController::class, 'destroy']);
+Route::get('/payslip-regular/period/{period}', [PayslipRegularController::class, 'getByPeriod']);
+Route::get('/payslip-regular/dtrs/{dtrs_id}', [PayslipRegularController::class, 'getByDtrs']);
+Route::get('/payslip-regular/name/{name_id}', [PayslipRegularController::class, 'getByName']);
+Route::post('/regular-generate-payslips/{dtrs}', [PayslipRegularController::class, 'generatePayslip']);
+Route::post('/regular-generate-batch-payslips', [PayslipRegularController::class, 'generateBatchPayslips']);
 
 Route::get('/storage/RSO/{filename}', function ($filename) {
     $path = storage_path('app/public/public/RSO/' . $filename);
