@@ -163,12 +163,12 @@ $leaveForms = $leaveForms->filter(function ($leaveForm) use ($startDate, $endDat
         while ($current <= $end) {
             $key = $travelOrder->name_id . '-' . $current->toDateString();
             if (isset($dtrDays[$key])) {
-                $dtrDays[$key] = array_merge($dtrDays[$key], ['tardiness' => 'T', 'undertime' => 'O']);
+                $dtrDays[$key] = array_merge($dtrDays[$key], ['tardiness' => 'TO', 'undertime' => $travelOrder->to_num]);
             } else {
                 $virtualDtrDays[$key] = [
                     'date' => $current->toDateString(),
-                    'tardiness' => 'T',
-                    'undertime' => 'O',
+                    'tardiness' => 'TO',
+                    'undertime' => $travelOrder->to_num,
                     'name_id' => $travelOrder->name_id,
                     'dtrs_id' => $dtrId
                 ];

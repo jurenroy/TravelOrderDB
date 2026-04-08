@@ -32,7 +32,7 @@ class ProcessMergedAttendance implements ShouldQueue
          // Define schedules as a multidimensional array
          $schedules = [
             1 => [ // Default
-                'mon' => ['min' => '08:00:00', 'max' => '8:00:00', 'hours' => 8, 'monday_fixed' => true],
+                'mon' => ['min' => '08:00:00', 'max' => '08:00:00', 'hours' => 8, 'monday_fixed' => true],
                 'tue' => ['min' => '07:00:00', 'max' => '09:00:00', 'hours' => 8],
                 'wed' => ['min' => '07:00:00', 'max' => '09:00:00', 'hours' => 8],
                 'thu' => ['min' => '07:00:00', 'max' => '09:00:00', 'hours' => 8],
@@ -51,7 +51,7 @@ class ProcessMergedAttendance implements ShouldQueue
                 'thu' => ['min' => '04:00:00', 'max' => '06:00:00', 'hours' => 10],
             ],
             4 => [ // DC/SC/RD
-                'mon' => ['min' => '08:00:00', 'max' => '8:00:00', 'hours' => 8, 'monday_fixed' => true],
+                'mon' => ['min' => '08:00:00', 'max' => '08:00:00', 'hours' => 8, 'monday_fixed' => true],
                 'tue' => ['min' => '07:00:00', 'max' => '09:00:00', 'hours' => 8],
                 'wed' => ['min' => '07:00:00', 'max' => '09:00:00', 'hours' => 8],
                 'thu' => ['min' => '07:00:00', 'max' => '09:00:00', 'hours' => 8],
@@ -183,9 +183,15 @@ class ProcessMergedAttendance implements ShouldQueue
         }
     
         // $undertime = max(0, ($scheduledMinutes - $workedMinutes)-$tardiness);
-        if ($workedMinutes < $halfDayThreshold) {
+        // if ($workedMinutes < $halfDayThreshold && $lunchDeduction) {
+        if ($lastOut > $lunchStart && $lastOut < $lunchEnd) { 
             // If worked less than half-day, undertime is half-day
-            $undertime = $scheduledMinutes - $workedMinutes;
+            if ($scheduledMinutes > 240) {
+                // Cap undertime at 240 minutes
+                $undertime = 240;
+            }else{
+                $undertime = $scheduledMinutes - $workedMinutes;
+            }
         } else {
             $undertime = max(0, $scheduledMinutes - $workedMinutes - $tardiness);
         }
