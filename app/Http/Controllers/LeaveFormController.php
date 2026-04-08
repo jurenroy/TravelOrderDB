@@ -108,7 +108,7 @@ class LeaveFormController extends Controller
                                 ->whereNull('appsig');
                           })
                           ->orWhere(function ($q) {
-                            $q->whereIn('name_id', [15, 21, 45, 48])
+                            $q->whereIn('name_id', [15, 21, 45, 48, 3])
                               ->whereNotNull('certification')
                               ->whereNull('appsig');
                         });
@@ -129,7 +129,7 @@ class LeaveFormController extends Controller
                                     ->whereNull('appsig');
                               })
                               ->orWhere(function ($q) {
-                                $q->whereIn('name_id', [15, 21, 45, 48])
+                                $q->whereIn('name_id', [15, 21, 45, 48,3])
                                   ->whereNotNull('certification')
                                   ->whereNull('appsig');
                             });
@@ -212,10 +212,10 @@ class LeaveFormController extends Controller
         return $query->orderBy('leaveform_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here
     }
 
-    public function getCount($name_id)
+    public function getCount(Request $request, $name_id)
     {
         // Call the getForm method with 'Pending' status and only ask for the count
-        return $this->show($name_id, 'Pending', 0, 0, true);
+        return $this->show($request, $name_id, 'Pending', 0, 0, true);
     }
 
     public function store(Request $request)
@@ -254,20 +254,20 @@ class LeaveFormController extends Controller
         // Create a new leave form record with the validated data
         $leaveForm = LeaveForm::create($validatedData);
 
-        // Audit log
-        AuditLog::create([
-            'model' => 'leaveform',
-            'model_id' => $leaveForm->leaveform_id,
-            'action' => 'created',
-            'new_values' => $validatedData,
-            'user_id' => auth()->id(),
-        ]);
+        // // Audit log
+        // AuditLog::create([
+        //     'model' => 'leaveform',
+        //     'model_id' => $leaveForm->leaveform_id,
+        //     'action' => 'created',
+        //     'new_values' => $validatedData,
+        //     'user_id' => auth()->id(),
+        // ]);
 
-        // Send notification via websocket
-        $this->sendNotification('Leave Form Created', 'A new leave form has been created for ' . $leaveForm->type);
+        // // Send notification via websocket
+        // $this->sendNotification('Leave Form Created', 'A new leave form has been created for ' . $leaveForm->type);
 
-        // Send admin notification to name_id 76
-        $this->sendNotification('Leave Form Created', 'A new leave form has been created for ' . $leaveForm->type, true);
+        // // Send admin notification to name_id 76
+        // $this->sendNotification('Leave Form Created', 'A new leave form has been created for ' . $leaveForm->type, true);
 
         return response()->json($leaveForm, 201);
     }
@@ -322,24 +322,24 @@ class LeaveFormController extends Controller
     // Update the fields
     $leaveForm->update($validatedData);
 
-    // Audit log
-    AuditLog::create([
-        'model' => 'leaveform',
-        'model_id' => $leaveForm->leaveform_id,
-        'action' => 'updated',
-        'old_values' => $oldValues,
-        'new_values' => $validatedData,
-        'user_id' => auth()->id(),
-    ]);
+    // // Audit log
+    // AuditLog::create([
+    //     'model' => 'leaveform',
+    //     'model_id' => $leaveForm->leaveform_id,
+    //     'action' => 'updated',
+    //     'old_values' => $oldValues,
+    //     'new_values' => $validatedData,
+    //     'user_id' => auth()->id(),
+    // ]);
 
-    // Check for status changes and send targeted notifications
-    $this->sendStatusNotifications($leaveForm, $oldValues, $validatedData);
+    // // Check for status changes and send targeted notifications
+    // $this->sendStatusNotifications($leaveForm, $oldValues, $validatedData);
 
-    // Send notification via websocket
-    $this->sendNotification('Leave Form Updated', 'Leave form for ' . $leaveForm->type . ' has been updated.');
+    // // Send notification via websocket
+    // $this->sendNotification('Leave Form Updated', 'Leave form for ' . $leaveForm->type . ' has been updated.');
 
-    // Send admin notification to name_id 76
-    $this->sendNotification('Leave Form Updated', 'Leave form for ' . $leaveForm->type . ' has been updated.', true);
+    // // Send admin notification to name_id 76
+    // $this->sendNotification('Leave Form Updated', 'Leave form for ' . $leaveForm->type . ' has been updated.', true);
 
     // Return the updated leave form
     return response()->json($leaveForm, 200);
