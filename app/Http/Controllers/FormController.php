@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\Http;
 
 class FormController extends Controller
 {
+    public function destroyByTravelOrderId($id)
+    {
+        // Find records by travel_order_id
+        $deleted = Form::where('travel_order_id', $id)->delete();
+    
+        if ($deleted) {
+            return redirect()->back()->with('success', 'Record(s) deleted successfully.');
+        }
+    
+        return redirect()->back()->with('error', 'No record found with that Travel Order ID.');
+    }
     public function showForm()
     {
         // If you want to display anything initially when the form is loaded
