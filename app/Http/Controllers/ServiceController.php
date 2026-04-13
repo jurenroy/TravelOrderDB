@@ -16,7 +16,7 @@ class ServiceController extends Controller
     $query = Service::query();
 
     // Apply conditions based on the name_id
-    if (in_array($name_id, [76, 77, 53])) {
+    if (in_array($name_id, [76, 77, 53,95])) {
         // Admins can see all services
         if ($status !== 'all') {
             if ($status === 'pending') {
