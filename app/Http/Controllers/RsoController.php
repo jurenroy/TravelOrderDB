@@ -135,15 +135,30 @@ public function index(Request $request)
             'rso_scheduled_dates_to' => 'nullable|date',
             'rso_signatory' => 'nullable|exists:users,id',
             'rso_remarks' => 'nullable|string',
-            'rso_scan_copy' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'rso_scan_copy' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'rso_scan_copy' => 'nullable',
+            'rso_scan_copy.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        if ($request->hasFile('rso_scan_copy')) {
-            $file = $request->file('rso_scan_copy');
-            $filename = 'RSO_' . time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('public/RSO', $filename);
-            $validated['rso_scan_copy'] = $filename;
-        }
+        // if ($request->hasFile('rso_scan_copy')) {
+        //     $file = $request->file('rso_scan_copy');
+        //     $filename = 'RSO_' . time() . '_' . $file->getClientOriginalName();
+        //     $file->storeAs('public/RSO', $filename);
+        //     $validated['rso_scan_copy'] = $filename;
+        // }
+
+        $filenames = [];
+
+if ($request->hasFile('rso_scan_copy')) {
+    foreach ($request->file('rso_scan_copy') as $file) {
+
+        $filename = 'RSO_' . time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+
+        $file->storeAs('public/RSO', $filename);
+
+        $filenames[] = $filename;
+    }
+}
 
         $rso = Rso::create($validated);
 
