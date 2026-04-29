@@ -145,6 +145,7 @@ Route::post('edit_employee', [EmployeeController::class, 'edit_employee']);
 Route::post('/addleave_form', [LeaveFormController::class, 'store']);
 
 Route::post('updateleave_form/{id}', [LeaveFormController::class, 'update']);
+Route::delete('/delete_leaveform/{id}', [LeaveFormController::class, 'destroyByLeaveFormId']);
 
 // Service Routes
 Route::post('services', [ServiceController::class, 'store']); // Create

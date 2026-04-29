@@ -516,37 +516,45 @@ class FormController extends Controller
         // return response()->json($forms);
 
 
-        // Now, apply search if provided
-        if ($request->has('search') && !empty($request->search)) {
-            $searchTerm = $request->search;
-            // If it's a string, search by the Names model
-            $names = \App\Models\Name::where(function ($query) use ($searchTerm) {
-                $query->whereRaw('LOWER(first_name) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
-                      ->orWhereRaw('LOWER(middle_init) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
-                      ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . strtolower($searchTerm) . '%']);
-            })->get();
+        if ($request->filled('search')) {
 
-            // Get all matching name_ids from the Names model
-            $nameIds = $names->pluck('name_id')->toArray();
+    $searchTerm = trim($request->search);
 
-            // If we found matching name_ids, filter RSOs accordingly
-            if (count($nameIds) > 0) {
-                // Apply the filter to the query using whereIn
-                $forms = $query->whereIn('name_id', $nameIds)  // Use whereIn for the filtering
-                               ->orderBy('travel_order_id', 'desc')
-                               ->get();
-            
-                // Apply offset and limit to the result collection (in-memory pagination)
-                $paginatedForms = $forms->slice($offset, $limit)->values();
-                            
-                // Return the paginated results as JSON
-                return response()->json($paginatedForms);
-            }
-             else {
-                // If no names match, return empty or handle as needed
-                return response()->json([]);
-            }
-        }
+    // CASE 1: travel_order_id search (exact or partial number)
+    if (is_numeric($searchTerm) || preg_match('/^\d{4}-\d+$/', $searchTerm)) {
+
+        $query->where('to_num', 'like', '%' . $searchTerm . '%');
+
+        $forms = $query->orderBy('to_num', 'desc')->get();
+
+        $paginatedForms = $forms->slice($offset, $limit)->values();
+
+        return response()->json($paginatedForms);
+    }
+
+    // CASE 2: name search
+    $names = \App\Models\Name::where(function ($query) use ($searchTerm) {
+        $query->whereRaw('LOWER(first_name) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
+              ->orWhereRaw('LOWER(middle_init) LIKE ?', ['%' . strtolower($searchTerm) . '%'])
+              ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . strtolower($searchTerm) . '%']);
+    })->get();
+
+    $nameIds = $names->pluck('name_id')->toArray();
+
+    if (!empty($nameIds)) {
+
+        $query->whereIn('name_id', $nameIds);
+
+        $forms = $query->orderBy('travel_order_id', 'desc')->get();
+
+        $paginatedForms = $forms->slice($offset, $limit)->values();
+
+        return response()->json($paginatedForms);
+
+    } else {
+        return response()->json([]);
+    }
+}
 
         // Get the filtered results with a limit, ordered descending by 'created_at'
         $forms = $query->orderBy('travel_order_id', 'desc')->offset($offset)->limit($limit)->get(); // Apply the limit here

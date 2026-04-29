@@ -455,4 +455,20 @@ class LeaveFormController extends Controller
             }
         }
     }
+    public function destroyByLeaveFormId($id)
+{
+    $leaveForm = LeaveForm::find($id);
+
+    if (!$leaveForm) {
+        return response()->json([
+            'message' => 'Leave form not found.'
+        ], 404);
+    }
+
+    $leaveForm->delete();
+
+    return response()->json([
+        'message' => 'Leave form deleted successfully.'
+    ], 200);
+}
 }

@@ -12,15 +12,58 @@ use Illuminate\Support\Facades\Http;
 class TravelClearanceController extends Controller
 {
     public function index(Request $request)
-    {
-        $limit = min($request->input('limit', 10), 10000);
-        $offset = $request->input('offset', 0); // Default to 0 if no offset is provided
-    
-        return response()->json(TravelClearance::orderBy('created_at', 'desc')
-            ->skip($offset)  // Skip the records based on the offset
-            ->take($limit)   // Limit the number of records
-            ->get());
+{
+    $limit = min($request->input('limit', 10), 10000);
+    $offset = $request->input('offset', 0);
+
+    $query = TravelClearance::query();
+
+    if ($request->filled('search')) {
+
+    $search = trim($request->search);
+
+    // CASE 1: full clearance number (2026-375)
+    if (preg_match('/^\d{4}-\d+$/', $search)) {
+
+        $query->where('clearance_number', $search);
+
+    } 
+    // CASE 2: numeric only (375)
+    elseif (is_numeric($search)) {
+
+        $query->where('clearance_number', 'like', '%' . $search . '%');
+
+    } 
+    // CASE 3: name search
+    else {
+
+        $names = \App\Models\Name::where(function ($q) use ($search) {
+            $q->whereRaw('LOWER(first_name) LIKE ?', ['%' . strtolower($search) . '%'])
+              ->orWhereRaw('LOWER(middle_init) LIKE ?', ['%' . strtolower($search) . '%'])
+              ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . strtolower($search) . '%']);
+        })->get();
+
+        $nameIds = $names->pluck('name_id')->toArray();
+
+        if (!empty($nameIds)) {
+            $query->where(function ($q) use ($nameIds) {
+                foreach ($nameIds as $id) {
+                    $q->orWhereRaw("FIND_IN_SET(?, name_id)", [$id]);
+                }
+            });
+        } else {
+            return response()->json([]);
+        }
     }
+}
+
+    $travelClearances = $query->orderBy('created_at', 'desc')
+                              ->skip($offset)
+                              ->take($limit)
+                              ->get();
+
+    return response()->json($travelClearances);
+}
 
     public function store(Request $request)
     {
@@ -177,7 +220,7 @@ class TravelClearanceController extends Controller
                 ->first();
         
                 if ($travelOrder) {
-                    $travelOrder->update(['hasclearance' => $validatedData['clearance_number'],
+                    $travelOrder->update(['hasclearance' => $travelClearance['clearance_number'],
                     'note' => $readableBasis, // 🟢 store the readable text
                 ]);
                 }
