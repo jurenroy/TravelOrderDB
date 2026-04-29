@@ -108,7 +108,7 @@ class LeaveFormController extends Controller
                                 ->whereNull('appsig');
                           })
                           ->orWhere(function ($q) {
-                            $q->whereIn('name_id', [15, 21, 45, 48, 3])
+                            $q->whereIn('name_id', [15, 21, 45, 3, 5])
                               ->whereNotNull('certification')
                               ->whereNull('appsig');
                         });
@@ -117,7 +117,8 @@ class LeaveFormController extends Controller
                     $query->whereIn('name_id', $divisionMembersIds)
                     ->whereNull('recommendation')
                     ->whereNotNull('certification')
-                    ->where('name_id', '!=', $name_id);
+                    ->where('name_id', '!=', $name_id)
+                    ->whereNull('appsig');
 
                     if ($name_id == $OICNameId[0]) {
                         $query->orWhere(function($q) use ($ORDMembersIds) {
@@ -129,7 +130,7 @@ class LeaveFormController extends Controller
                                     ->whereNull('appsig');
                               })
                               ->orWhere(function ($q) {
-                                $q->whereIn('name_id', [15, 21, 45, 48,3])
+                                $q->whereIn('name_id', [15, 21, 45,3, 5])
                                   ->whereNotNull('certification')
                                   ->whereNull('appsig');
                             });
@@ -154,6 +155,22 @@ class LeaveFormController extends Controller
                       });
             } elseif ($status === 'Done') {
                 $query->where(function ($q) {
+                          $q->whereNotNull('appsig');
+                      });
+            }
+        }
+        else if ($name_id == 48){
+            if ($status === 'Me') {
+                $query->where('name_id', $name_id);
+            } elseif ($status === 'Pending') {
+                $query->where(function ($q) use ($name_id) {
+                    $q->where('name_id', $name_id)
+                      ->orWhereIn('leaveform_id', [366, 367]);
+                })
+                ->whereNull('appsig');
+            } elseif ($status === 'Done') {
+                $query->where('name_id', $name_id)
+                      ->where(function ($q) {
                           $q->whereNotNull('appsig');
                       });
             }
